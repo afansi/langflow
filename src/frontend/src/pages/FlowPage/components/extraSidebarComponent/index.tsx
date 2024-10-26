@@ -247,7 +247,9 @@ export default function ExtraSidebar(): JSX.Element {
             ) : (
               <div key={index}></div>
             ),
-          )}
+          )
+        }
+        {/*
         {ENABLE_INTEGRATIONS && (
           <ParentDisclosureComponent
             defaultOpen={true}
@@ -277,6 +279,7 @@ export default function ExtraSidebar(): JSX.Element {
               )}
           </ParentDisclosureComponent>
         )}
+        */}
         <ParentDisclosureComponent
           defaultOpen={search.length !== 0 || getFilterEdge.length !== 0}
           key={`${search.length !== 0}-${getFilterEdge.length !== 0}-Advanced`}
@@ -287,6 +290,7 @@ export default function ExtraSidebar(): JSX.Element {
           }}
           testId="extended-disclosure"
         >
+          {/*
           {Object.keys(dataFilter)
             .sort(sortKeys)
             .filter(
@@ -308,6 +312,7 @@ export default function ExtraSidebar(): JSX.Element {
                 <div key={index}></div>
               ),
             )}
+            */}
           {hasStore && (
             <a
               target={"_blank"}

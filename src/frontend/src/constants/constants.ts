@@ -728,6 +728,9 @@ export const PRIORITY_SIDEBAR_ORDER = [
   "helpers",
   "vectorstores",
   "embeddings",
+  "flow_control",
+  "messaging",
+  "tools_code",
 ];
 
 export const BUNDLES_SIDEBAR_FOLDER_NAMES = [

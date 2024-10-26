@@ -41,12 +41,14 @@ export default function AppHeader(): JSX.Element {
             <span className="fill-black text-2xl dark:fill-white">⛓️</span>
           )}
         </Button>
+        {/*
         {ENABLE_DATASTAX_LANGFLOW && (
           <>
             <CustomOrgSelector />
             <CustomProductSelector />
           </>
         )}
+        */}
       </div>
 
       {/* Middle Section */}
@@ -56,6 +58,7 @@ export default function AppHeader(): JSX.Element {
 
       {/* Right Section */}
       <div className="flex items-center gap-2">
+        {/*
         {!ENABLE_DATASTAX_LANGFLOW && (
           <>
             <Button
@@ -73,6 +76,7 @@ export default function AppHeader(): JSX.Element {
             />
           </>
         )}
+        */}
         <AlertDropdown>
           <ShadTooltip content="Notifications" side="bottom">
             <Button variant="ghost" className="flex text-sm font-medium">
@@ -110,6 +114,7 @@ export default function AppHeader(): JSX.Element {
             />
           </>
         )}
+        {/*
         {ENABLE_DATASTAX_LANGFLOW && (
           <>
             <ShadTooltip content="Docs" side="bottom">
@@ -151,7 +156,10 @@ export default function AppHeader(): JSX.Element {
             />
           </>
         )}
+        */}
+        {/*
         <AccountMenu />
+        */}
       </div>
     </div>
   );

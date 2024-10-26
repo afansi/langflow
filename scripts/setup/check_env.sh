@@ -4,11 +4,11 @@
 if [ -n "$VIRTUAL_ENV" ]; then
     PYTHON_EXEC=python
 elif [ -n "$CONDA_DEFAULT_ENV" ]; then
-    PYTHON_EXEC=conda run -n "$CONDA_DEFAULT_ENV" python
+    PYTHON_EXEC="conda run -n $CONDA_DEFAULT_ENV python"
 elif [ -f "Pipfile" ]; then
-    PYTHON_EXEC=pipenv run python
+    PYTHON_EXEC="pipenv run python"
 elif [ -d ".pyenv" ]; then
-    PYTHON_EXEC=pyenv exec python
+    PYTHON_EXEC="pyenv exec python"
 else
     PYTHON_EXEC=python
 fi

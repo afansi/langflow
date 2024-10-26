@@ -171,10 +171,13 @@ export default function FlowPage({ view }: { view?: boolean }): JSX.Element {
               <div className="h-full w-full">
                 <Page />
               </div>
+              {/*
               {!view && <FlowToolbar />}
+              */}
             </main>
           </div>
         )}
+        {/*
         {ENABLE_BRANDING && version && (
           <a
             target={"_blank"}
@@ -186,6 +189,7 @@ export default function FlowPage({ view }: { view?: boolean }): JSX.Element {
             <div className={version ? "mt-2" : "mt-1"}>⛓️ v{version}</div>
           </a>
         )}
+        */}
       </div>
       {blocker.state === "blocked" && (
         <>

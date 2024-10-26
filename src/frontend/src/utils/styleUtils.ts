@@ -331,6 +331,10 @@ export const nodeColors: { [char: string]: string } = {
   Embeddings: "#10b981",
   BaseLanguageModel: "#c026d3",
   LanguageModel: "#c026d3",
+
+  flow_control: "#10B981",
+  messaging: "#AA2411",
+  tools_code: "#4367BF",
 };
 
 export const nodeNames: { [char: string]: string } = {
@@ -367,6 +371,9 @@ export const nodeNames: { [char: string]: string } = {
   custom_components: "Custom",
   link_extractors: "Link Extractors",
   unknown: "Other",
+  flow_control: "Flow Control",
+  messaging: "Messaging",
+  tools_code: "Tools & Coding",
 };
 
 export const nodeIconsLucide: iconsType = {
@@ -667,4 +674,7 @@ export const nodeIconsLucide: iconsType = {
   TavilyIcon,
   DuckDuckGo: DuckDuckGoIcon,
   OpenSearch,
+  flow_control: Scissors,
+  messaging: Bot,
+  tools_code: Hammer,
 };
