@@ -6,6 +6,7 @@ import ShadTooltip from "../../../../components/shadTooltipComponent";
 import {
   isValidConnection,
   scapedJSONStringfy,
+  getNumberConnections,
 } from "../../../../utils/reactflowUtils";
 import { classNames, cn, groupByFamily } from "../../../../utils/utils";
 import HandleTooltipComponent from "../HandleTooltipComponent";
@@ -24,6 +25,7 @@ export default function HandleRenderComponent({
   showNode,
   testIdComplement,
   nodeId,
+  maxConnections,
 }: {
   left: boolean;
   nodes: any;
@@ -38,6 +40,7 @@ export default function HandleRenderComponent({
   showNode: any;
   testIdComplement?: string;
   nodeId: string;
+  maxConnections?: number;
 }) {
   const setHandleDragging = useFlowStore((state) => state.setHandleDragging);
   const setFilterType = useFlowStore((state) => state.setFilterType);
@@ -184,6 +187,7 @@ export default function HandleRenderComponent({
   );
 
   const [openTooltip, setOpenTooltip] = useState(false);
+
   return (
     <div>
       <ShadTooltip
@@ -212,7 +216,7 @@ export default function HandleRenderComponent({
           key={myId}
           id={myId}
           isValidConnection={(connection) =>
-            isValidConnection(connection, nodes, edges)
+            isValidConnection(connection, nodes, edges)  && (maxConnections===undefined || getNumberConnections(connection, nodes, edges, left ? "target" : "source") <= maxConnections)
           }
           className={classNames(
             `group/handle z-20 h-6 w-6 rounded-full border-none bg-transparent transition-all`,

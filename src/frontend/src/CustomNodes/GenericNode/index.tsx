@@ -164,6 +164,7 @@ export default function GenericNode({
         type={output.types.join("|")}
         showNode={showNode}
         outputName={output.name}
+        maxConnections={output.max_connections}
       />
     );
   };
@@ -248,6 +249,7 @@ export default function GenericNode({
             }}
             type={data.node?.template[templateField].type}
             optionalHandle={data.node?.template[templateField].input_types}
+            maxConnections={data.node?.template[templateField].max_connections}
             proxy={data.node?.template[templateField].proxy}
             showNode={showNode}
           />

@@ -101,6 +101,7 @@ export type OutputFieldType = {
   display_name: string;
   hidden?: boolean;
   proxy?: OutputFieldProxyType;
+  max_connections?: number | undefined;
 };
 export type sendAllProps = {
   nodes: Node[];

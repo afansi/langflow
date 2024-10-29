@@ -61,7 +61,7 @@ class SendMessageComponent(Component):
             #input_types=["Text"]
         ),
         Input(
-            name="metadata",
+            name="my_metadata",
             display_name="Metadata",
             #field_type="str",
             required=False,
@@ -71,7 +71,7 @@ class SendMessageComponent(Component):
             #input_types=["Text"]
         ),
         Input(
-            name="metadata2",
+            name="my_metadata2",
             display_name="Metadata 2",
             field_type="NestedDict", # "dict",
             required=False,
@@ -84,8 +84,8 @@ class SendMessageComponent(Component):
     ]
 
     outputs = [
-        Output(display_name="Sent", name="sent", method="build_output_1"),
-        Output(display_name="Failed", name="failed", method="build_output_2"),
+        Output(display_name="Sent", name="sent", method="build_output_1", max_connections=1),
+        Output(display_name="Failed", name="failed", method="build_output_2", max_connections=1),
     ]
     
     

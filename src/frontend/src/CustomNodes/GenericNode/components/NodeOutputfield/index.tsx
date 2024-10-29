@@ -34,6 +34,7 @@ export default function NodeOutputField({
   type,
   outputName,
   outputProxy,
+  maxConnections,
 }: NodeOutputFieldComponentType): JSX.Element {
   const ref = useRef<HTMLDivElement>(null);
   const nodes = useFlowStore((state) => state.nodes);
@@ -116,6 +117,7 @@ export default function NodeOutputField({
       setFilterEdge={setFilterEdge}
       showNode={showNode}
       testIdComplement={`${data?.type?.toLowerCase()}-${showNode ? "shownode" : "noshownode"}`}
+      maxConnections={maxConnections}
     />
   );
 

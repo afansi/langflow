@@ -63,8 +63,8 @@ class RunSubflowComponent(Component):
     ]
 
     outputs = [
-        Output(display_name="Completed", name="completed", method="build_output_1"),
-        Output(display_name="Failed", name="failed", method="build_output_2"),
+        Output(display_name="Completed", name="completed", method="build_output_1", max_connections=1),
+        Output(display_name="Failed", name="failed", method="build_output_2", max_connections=1),
     ]
     
     

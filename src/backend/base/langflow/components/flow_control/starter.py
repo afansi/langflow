@@ -1,6 +1,6 @@
 # from langflow.field_typing import Data
 from langflow.custom import Component
-from langflow.io import MessageTextInput, Output
+from langflow.io import MessageTextInput, Output, HandleInput
 from langflow.schema import Data
 import random
 
@@ -17,10 +17,10 @@ class StarterComponent(Component):
     ]
 
     outputs = [
-        Output(display_name="Incoming Message", name="incoming_message_event", method="build_output_1"),
-        Output(display_name="Incoming Conversation", name="incoming_conversation_event", method="build_output_2"),
-        Output(display_name="REST API", name="rest_api_event", method="build_output_3"),
-        Output(display_name="SubModule", name="sub_module_envent", method="build_output_4"),
+        Output(display_name="Incoming Message", name="incoming_message_event", method="build_output_1", max_connections=1),
+        Output(display_name="Incoming Conversation", name="incoming_conversation_event", method="build_output_2", max_connections=1),
+        Output(display_name="REST API", name="rest_api_event", method="build_output_3", max_connections=1),
+        Output(display_name="SubModule", name="sub_module_envent", method="build_output_4", max_connections=1),
     ]
     
     

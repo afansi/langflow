@@ -210,6 +210,30 @@ export function unselectAllNodes({ updateNodes, data }: unselectAllNodesType) {
   updateNodes(newNodes!);
 }
 
+export function getNumberConnections(
+  { source, target, sourceHandle, targetHandle }: Connection,
+  nodes: Node[],
+  edges: Edge[],
+  type: string
+) {
+ 
+  let result = 0;
+  if(type==="target"){
+    for (let i = 0; i < edges.length; i++) {
+      if (edges[i].target===target! && edges[i].targetHandle === targetHandle!) {
+        result += 1;
+      }
+    }
+  }else if(type==="source"){
+    for (let i = 0; i < edges.length; i++) {
+      if (edges[i].source===source! && edges[i].sourceHandle === sourceHandle) {
+        result += 1;
+      }
+    }
+  }
+  return result;  
+}
+
 export function isValidConnection(
   { source, target, sourceHandle, targetHandle }: Connection,
   nodes: Node[],
