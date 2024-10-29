@@ -16,6 +16,10 @@ from . import (
     toolkits,
     tools,
     vectorstores,
+    
+    tools_code,
+    messaging,
+    flow_controls,
 )
 
 __all__ = [
@@ -37,4 +41,8 @@ __all__ = [
     "toolkits",
     "tools",
     "vectorstores",
+    
+    "tools_code",
+    "messaging",
+    "flow_controls",
 ]

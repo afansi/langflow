@@ -200,4 +200,9 @@ SIDEBAR_CATEGORIES = [
     {"display_name": "Text Splitters", "name": "textsplitters", "icon": "Scissors"},
     {"display_name": "Toolkits", "name": "toolkits", "icon": "Package2"},
     {"display_name": "Tools", "name": "tools", "icon": "Hammer"},
+
+
+    {"display_name": "Flow Control", "name": "flow_control", "icon": "Scissors"},
+    {"display_name": "Messaging", "name": "messaging", "icon": "Bot"},
+    {"display_name": "Tools & Coding", "name": "tools_code", "icon": "Hammer"},
 ]
