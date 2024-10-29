@@ -1,6 +1,6 @@
 # from langflow.field_typing import Data
 from langflow.custom import Component
-from langflow.io import MessageTextInput, Output
+from langflow.io import MessageTextInput, Output, HandleInput
 from langflow.schema import Data
 from langflow.template import Input, Output
 import random
@@ -10,69 +10,76 @@ class SendMessageComponent(Component):
     display_name = "SendMessage"
     description = "Send Message component."
     documentation: str = "http://docs.langflow.org/components/custom"
-    icon = "custom_components"
+    icon = "message-square-more"
     name = "SendMessage"
 
     inputs = [
+        HandleInput(
+            name="entry",
+            display_name="Node Entry",
+            #field_type="bool", # if uncommented, will put the input entry of the field on the form
+            input_types=["bool"]
+        ),
         Input(
             name="dest",
             display_name="To",
-            field_type="str",
+            #field_type="str",
             required=True,
             placeholder="Recipient of the message",
             multiline=False,
             info="the recipient of the message.",
-            input_types=["Text"]
+            #input_types=["Text"]
         ),
         Input(
             name="src",
             display_name="From",
-            field_type="str",
+            #field_type="str",
             required=True,
             placeholder="Sender of the message",
             multiline=False,
             info="the sender of the message.",
-            input_types=["Text"]
+            #input_types=["Text"]
         ),
         Input(
             name="body_text",
             display_name="Body",
-            field_type="str",
+            #field_type="str",
             required=True,
             placeholder="Body of the message",
             multiline=True,
             info="the message body to send.",
-            input_types=["Text"]
+            #input_types=["Text"]
         ),
         Input(
             name="media_url",
             display_name="Media URL",
-            field_type="str",
+            #field_type="str",
             required=False,
             placeholder="The url of the media",
             multiline=False,
             info="the url of the media to send.",
-            input_types=["Text"]
+            #input_types=["Text"]
         ),
         Input(
             name="metadata",
             display_name="Metadata",
-            field_type="str",
+            #field_type="str",
             required=False,
             placeholder="The message metadata",
             multiline=True,
             info="the messag metadata.",
-            input_types=["Text"]
+            #input_types=["Text"]
         ),
         Input(
             name="metadata2",
             display_name="Metadata 2",
-            field_type="dict",
+            field_type="NestedDict", # "dict",
             required=False,
             placeholder="The message metadata",
             multiline=False,
             info="the messag metadata.",
-            input_types=["NestedDict"]
+            is_list=True,
+            #input_types=["NestedDict"]
         ),
     ]
 

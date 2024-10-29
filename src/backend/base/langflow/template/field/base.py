@@ -189,6 +189,9 @@ class Output(BaseModel):
     required_inputs: list[str] | None = Field(default=None)
     """List of required inputs for this output."""
 
+    max_connections: int | None = Field(default=None)
+    """Maximum number of connections from this output handler"""
+
     def to_dict(self):
         return self.model_dump(by_alias=True, exclude_none=True)
 

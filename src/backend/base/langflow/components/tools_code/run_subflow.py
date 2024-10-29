@@ -1,6 +1,6 @@
 # from langflow.field_typing import Data
 from langflow.custom import Component
-from langflow.io import MessageTextInput, Output
+from langflow.io import MessageTextInput, Output, HandleInput
 from langflow.schema import Data
 from langflow.template import Input, Output
 import random
@@ -14,25 +14,31 @@ class RunSubflowComponent(Component):
     name = "RunSubflow"
 
     inputs = [
+        HandleInput(
+            name="entry",
+            display_name="Node Entry",
+            #field_type="bool", # if uncommented, will put the input entry of the field on the form
+            input_types=["bool"]
+        ),
         Input(
             name="my_flow_id",
             display_name="Flow ID",
-            field_type="str",
+            #field_type="str",
             required=True,
             placeholder="The ID of the flow containing the subflow",
             multiline=False,
             info="The ID of the flow containing the subflow.",
-            input_types=["Text"]
+            #input_types=["Text"]
         ),
         Input(
             name="my_flow_version",
             display_name="Flow Version",
-            field_type="str",
+            #field_type="str",
             required=True,
             placeholder="The flow version",
             multiline=False,
             info="the flow version.",
-            input_types=["Text"]
+            #input_types=["Text"]
         ),
         Input(
             name="parameters",
@@ -42,7 +48,8 @@ class RunSubflowComponent(Component):
             placeholder="The flow params",
             multiline=False,
             info="the flow params.",
-            input_types=["Dict"]
+            is_list=True,
+            #input_types=["Dict"]
         ),
         Input(
             name="parse_as_json_flag",
@@ -51,7 +58,7 @@ class RunSubflowComponent(Component):
             required=False,
             placeholder="whether to parse params as Json",
             info="whether to parse params as Json.",
-            input_types=["bool"]
+            #input_types=["bool"]
         ),
     ]
 
