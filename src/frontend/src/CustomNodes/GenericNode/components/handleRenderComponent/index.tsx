@@ -216,10 +216,10 @@ export default function HandleRenderComponent({
           key={myId}
           id={myId}
           isValidConnection={(connection) =>
-            isValidConnection(connection, nodes, edges)  && (maxConnections===undefined || getNumberConnections(connection, nodes, edges, left ? "target" : "source") <= maxConnections)
+            isValidConnection(connection, nodes, edges)  && (maxConnections===undefined || maxConnections <= 0 || (getNumberConnections(connection, nodes, edges, left ? "target" : "source") < maxConnections))
           }
           className={classNames(
-            `group/handle z-20 h-6 w-6 rounded-full border-none bg-transparent transition-all`,
+            `group/handle z-20 h-6 w-6 rounded-full border-none bg-transparent transition-all `, // ${maxConnections===undefined? "class-max-con-undefined" : "class-max-con-defined-"+maxConnections.toString()}
           )}
           onClick={() => {
             setFilterEdge(groupByFamily(myData, tooltipTitle!, left, nodes!));

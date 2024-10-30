@@ -226,6 +226,7 @@ export default function GenericNode({
               id: data.id,
               fieldName: templateField,
               proxy: data.node!.template[templateField].proxy,
+              acceptMultipleEdgeFlag: data.node!.template[templateField].can_accept_multiple_edges
             })}
             data={data}
             colors={getNodeInputColors(

@@ -103,7 +103,7 @@ export type NodeInputFieldComponentType = {
   optionalHandle: Array<String> | undefined | null;
   info: string;
   proxy: { field: string; id: string } | undefined;
-  showNode: boolean;  
+  showNode: boolean; 
   maxConnections?: number | undefined;
 };
 

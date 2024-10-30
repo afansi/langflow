@@ -86,6 +86,12 @@ class BaseInputMixin(BaseModel, validate_assignment=True):  # type: ignore[call-
     title_case: bool = False
     """Specifies if the field should be displayed in title case. Defaults to True."""
 
+    can_accept_multiple_edges: bool = False
+    """Specifies if the field can accept multiple edges. Defaults to False."""
+
+    max_connections: int | None = None
+    """Maximum number of connections to this input handler"""
+
     def to_dict(self):
         return self.model_dump(exclude_none=True, by_alias=True)
 

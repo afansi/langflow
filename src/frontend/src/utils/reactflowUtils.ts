@@ -231,6 +231,7 @@ export function getNumberConnections(
       }
     }
   }
+  //console.log(source + " (" + sourceHandle + ")" + " -> " + target + " (" + targetHandle + "): " + result.toString() );
   return result;  
 }
 
@@ -256,12 +257,12 @@ export function isValidConnection(
   ) {
     let targetNode = nodes.find((node) => node.id === target!)?.data?.node;
     if (!targetNode) {
-      if (!edges.find((e) => e.targetHandle === targetHandle)) {
+      if ((!edges.find((e) => e.targetHandle === targetHandle)) || targetHandleObject.acceptMultipleEdgeFlag) {
         return true;
       }
     } else if (
       (!targetNode.template[targetHandleObject.fieldName].list &&
-        !edges.find((e) => e.targetHandle === targetHandle)) ||
+        ((!edges.find((e) => e.targetHandle === targetHandle) || targetHandleObject.acceptMultipleEdgeFlag))) ||
       targetNode.template[targetHandleObject.fieldName].list
     ) {
       return true;

@@ -365,6 +365,7 @@
               },
               "code": {
                 "advanced": true,
+                "can_accept_multiple_edges": false,
                 "dynamic": true,
                 "fileTypes": [],
                 "file_path": "",
@@ -641,6 +642,7 @@
               },
               "code": {
                 "advanced": true,
+                "can_accept_multiple_edges": false,
                 "dynamic": true,
                 "fileTypes": [],
                 "file_path": "",
@@ -926,6 +928,7 @@
               "_type": "Component",
               "code": {
                 "advanced": true,
+                "can_accept_multiple_edges": false,
                 "dynamic": true,
                 "fileTypes": [],
                 "file_path": "",
@@ -1117,6 +1120,7 @@
               "_type": "Component",
               "code": {
                 "advanced": true,
+                "can_accept_multiple_edges": false,
                 "dynamic": true,
                 "fileTypes": [],
                 "file_path": "",
@@ -1313,6 +1317,7 @@
               },
               "code": {
                 "advanced": true,
+                "can_accept_multiple_edges": false,
                 "dynamic": true,
                 "fileTypes": [],
                 "file_path": "",
@@ -1572,6 +1577,7 @@
               },
               "code": {
                 "advanced": true,
+                "can_accept_multiple_edges": false,
                 "dynamic": true,
                 "fileTypes": [],
                 "file_path": "",
@@ -1828,6 +1834,7 @@
               },
               "code": {
                 "advanced": true,
+                "can_accept_multiple_edges": false,
                 "dynamic": true,
                 "fileTypes": [],
                 "file_path": "",
@@ -2118,6 +2125,7 @@
               "_type": "Component",
               "code": {
                 "advanced": true,
+                "can_accept_multiple_edges": false,
                 "dynamic": true,
                 "fileTypes": [],
                 "file_path": "",
@@ -2236,6 +2244,7 @@
               "_type": "Component",
               "code": {
                 "advanced": true,
+                "can_accept_multiple_edges": false,
                 "dynamic": true,
                 "fileTypes": [],
                 "file_path": "",
@@ -2507,6 +2516,7 @@
               },
               "code": {
                 "advanced": true,
+                "can_accept_multiple_edges": false,
                 "dynamic": true,
                 "fileTypes": [],
                 "file_path": "",
@@ -2752,6 +2762,7 @@
               },
               "code": {
                 "advanced": true,
+                "can_accept_multiple_edges": false,
                 "dynamic": true,
                 "fileTypes": [],
                 "file_path": "",
