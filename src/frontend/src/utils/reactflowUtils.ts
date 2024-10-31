@@ -220,10 +220,11 @@ export function getNumberConnections(
   let result = 0;
   if(type==="target"){
     for (let i = 0; i < edges.length; i++) {
-      if (edges[i].target===target! && edges[i].targetHandle === targetHandle!) {
+      if (edges[i].targetHandle === targetHandle) {
         result += 1;
       }
     }
+    console.log(" (" + targetHandle + "): " + result.toString() );
   }else if(type==="source"){
     for (let i = 0; i < edges.length; i++) {
       if (edges[i].source===source! && edges[i].sourceHandle === sourceHandle) {
@@ -231,6 +232,7 @@ export function getNumberConnections(
       }
     }
   }
+  //console.log(type + " (" + targetHandle + "): " + result.toString() );
   //console.log(source + " (" + sourceHandle + ")" + " -> " + target + " (" + targetHandle + "): " + result.toString() );
   return result;  
 }
@@ -245,6 +247,10 @@ export function isValidConnection(
   }
   const targetHandleObject: targetHandleType = scapeJSONParse(targetHandle!);
   const sourceHandleObject: sourceHandleType = scapeJSONParse(sourceHandle!);
+
+  let currentTargetHandleNumConnections = edges.filter((e) => e.targetHandle===targetHandle).length;
+  let currentSourceHandleNumConnections = edges.filter((e) => e.sourceHandle===sourceHandle).length;
+
   if (
     targetHandleObject.inputTypes?.some(
       (n) => n === sourceHandleObject.dataType,
@@ -256,13 +262,35 @@ export function isValidConnection(
     )
   ) {
     let targetNode = nodes.find((node) => node.id === target!)?.data?.node;
+    let acceptMultipleEdgeFlag = targetNode?.template[targetHandleObject.fieldName].can_accept_multiple_edges;
+    let maxConnections = targetNode?.template[targetHandleObject.fieldName].max_connections;
+
+
+    let sourceNode = nodes.find((node) => node.id === source!)?.data?.node;
+    if(sourceNode){
+      let maxSourceConnections = undefined;
+      if(sourceNode?.outputs?.length){
+        for (let i = 0; i < sourceNode.outputs.length; i++) {
+          if (sourceNode.outputs[i].name===sourceHandleObject.name) {
+            maxSourceConnections = sourceNode.outputs[i].max_connections;
+            break;
+          }
+        }
+      }
+      if(maxSourceConnections!==undefined && (currentSourceHandleNumConnections >= maxSourceConnections)){
+        return false;
+      }
+    }
+
+    //console.log("Target:  " + target + " (" + targetHandle + "): " + targetHandleObject.acceptMultipleEdgeFlag + " :: " + acceptMultipleEdgeFlag + " :: " + maxConnections + " :: " + currentTargetHandleNumConnections + " :: " + targetHandleMaxConnections );
+    //console.log("Source:  " + source + " (" + sourceHandle + "): " + currentSourceHandleNumConnections + " :: " + sourceHandleMaxConnections );
     if (!targetNode) {
-      if ((!edges.find((e) => e.targetHandle === targetHandle)) || targetHandleObject.acceptMultipleEdgeFlag) {
+      if ((!edges.find((e) => e.targetHandle === targetHandle)) ) { 
         return true;
       }
     } else if (
       (!targetNode.template[targetHandleObject.fieldName].list &&
-        ((!edges.find((e) => e.targetHandle === targetHandle) || targetHandleObject.acceptMultipleEdgeFlag))) ||
+        ((!edges.find((e) => e.targetHandle === targetHandle) || (acceptMultipleEdgeFlag && (maxConnections===undefined || currentTargetHandleNumConnections < maxConnections)) ))) ||
       targetNode.template[targetHandleObject.fieldName].list
     ) {
       return true;

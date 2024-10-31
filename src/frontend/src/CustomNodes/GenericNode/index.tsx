@@ -148,6 +148,7 @@ export default function GenericNode({
             name: output.name,
             id: data.id,
             dataType: data.type,
+            maxConnections: output.max_connections,
           }) + idx
         }
         data={data}
@@ -164,7 +165,6 @@ export default function GenericNode({
         type={output.types.join("|")}
         showNode={showNode}
         outputName={output.name}
-        maxConnections={output.max_connections}
       />
     );
   };
@@ -226,7 +226,8 @@ export default function GenericNode({
               id: data.id,
               fieldName: templateField,
               proxy: data.node!.template[templateField].proxy,
-              acceptMultipleEdgeFlag: data.node!.template[templateField].can_accept_multiple_edges
+              acceptMultipleEdgeFlag: data.node!.template[templateField].can_accept_multiple_edges,
+              maxConnections: data.node!.template[templateField].max_connections,
             })}
             data={data}
             colors={getNodeInputColors(
@@ -250,7 +251,6 @@ export default function GenericNode({
             }}
             type={data.node?.template[templateField].type}
             optionalHandle={data.node?.template[templateField].input_types}
-            maxConnections={data.node?.template[templateField].max_connections}
             proxy={data.node?.template[templateField].proxy}
             showNode={showNode}
           />

@@ -25,7 +25,6 @@ export default function HandleRenderComponent({
   showNode,
   testIdComplement,
   nodeId,
-  maxConnections,
 }: {
   left: boolean;
   nodes: any;
@@ -40,7 +39,6 @@ export default function HandleRenderComponent({
   showNode: any;
   testIdComplement?: string;
   nodeId: string;
-  maxConnections?: number;
 }) {
   const setHandleDragging = useFlowStore((state) => state.setHandleDragging);
   const setFilterType = useFlowStore((state) => state.setFilterType);
@@ -216,10 +214,10 @@ export default function HandleRenderComponent({
           key={myId}
           id={myId}
           isValidConnection={(connection) =>
-            isValidConnection(connection, nodes, edges)  && (maxConnections===undefined || maxConnections <= 0 || (getNumberConnections(connection, nodes, edges, left ? "target" : "source") < maxConnections))
+            isValidConnection(connection, nodes, edges) 
           }
           className={classNames(
-            `group/handle z-20 h-6 w-6 rounded-full border-none bg-transparent transition-all `, // ${maxConnections===undefined? "class-max-con-undefined" : "class-max-con-defined-"+maxConnections.toString()}
+            `group/handle z-20 h-6 w-6 rounded-full border-none bg-transparent transition-all `, 
           )}
           onClick={() => {
             setFilterEdge(groupByFamily(myData, tooltipTitle!, left, nodes!));

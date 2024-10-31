@@ -88,7 +88,6 @@ export type NodeOutputFieldComponentType = {
   type: string | undefined;
   outputName?: string;
   outputProxy?: OutputFieldProxyType;
-  maxConnections?: number | undefined;
 };
 
 export type NodeInputFieldComponentType = {
@@ -103,8 +102,7 @@ export type NodeInputFieldComponentType = {
   optionalHandle: Array<String> | undefined | null;
   info: string;
   proxy: { field: string; id: string } | undefined;
-  showNode: boolean; 
-  maxConnections?: number | undefined;
+  showNode: boolean;
 };
 
 export type IOJSONInputComponentType = {
