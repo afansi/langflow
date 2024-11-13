@@ -116,12 +116,12 @@ export default function useShortcuts({
 
   useHotkeys(minimize, handleMinimizeWShortcut, { preventDefault: true });
   useHotkeys(group, handleGroupWShortcut, { preventDefault: true });
-  useHotkeys(component, handleShareWShortcut, { preventDefault: true });
-  useHotkeys(code, handleCodeWShortcut, { preventDefault: true });
+  // useHotkeys(component, handleShareWShortcut, { preventDefault: true });
+  // useHotkeys(code, handleCodeWShortcut, { preventDefault: true });
   useHotkeys(advanced, handleAdvancedWShortcut, { preventDefault: true });
   useHotkeys(save, handleSaveWShortcut, { preventDefault: true });
   useHotkeys(docs, handleDocsWShortcut, { preventDefault: true });
   useHotkeys(download, handleDownloadWShortcut, { preventDefault: true });
-  useHotkeys(freeze, handleFreeze);
-  useHotkeys(freezeAll, handleFreezeAll);
+  //useHotkeys(freeze, handleFreeze);
+  //useHotkeys(freezeAll, handleFreezeAll);
 }

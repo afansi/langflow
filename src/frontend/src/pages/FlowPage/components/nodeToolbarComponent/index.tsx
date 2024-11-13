@@ -213,11 +213,14 @@ export default function NodeToolbarComponent({
     showconfirmShare,
   ]);
 
+  const isStarterNode = data.node!.type == "Starter";
+
   const handleSelectChange = (event) => {
     switch (event) {
       case "save":
         saveComponent();
         break;
+      /*
       case "freeze":
         freezeFunction();
         break;
@@ -227,6 +230,7 @@ export default function NodeToolbarComponent({
       case "code":
         setOpenModal(!openModal);
         break;
+      */
       case "advanced":
         setShowModalAdvanced(true);
         break;
@@ -258,28 +262,34 @@ export default function NodeToolbarComponent({
         setShowOverrideModal(true);
         break;
       case "delete":
-        deleteNode(data.id);
+        if(!isStarterNode){
+          deleteNode(data.id);
+        }
         break;
       case "update":
         updateNode();
         break;
       case "copy":
-        const node = nodes.filter((node) => node.id === data.id);
-        setLastCopiedSelection({ nodes: _.cloneDeep(node), edges: [] });
+        if(!isStarterNode){
+          const node = nodes.filter((node) => node.id === data.id);
+          setLastCopiedSelection({ nodes: _.cloneDeep(node), edges: [] });
+        }
         break;
       case "duplicate":
-        paste(
-          {
-            nodes: [nodes.find((node) => node.id === data.id)!],
-            edges: [],
-          },
-          {
-            x: 50,
-            y: 10,
-            paneX: nodes.find((node) => node.id === data.id)?.position.x,
-            paneY: nodes.find((node) => node.id === data.id)?.position.y,
-          },
-        );
+        if(!isStarterNode){
+          paste(
+            {
+              nodes: [nodes.find((node) => node.id === data.id)!],
+              edges: [],
+            },
+            {
+              x: 50,
+              y: 10,
+              paneX: nodes.find((node) => node.id === data.id)?.position.x,
+              paneY: nodes.find((node) => node.id === data.id)?.position.y,
+            },
+          );
+        }
         break;
     }
   };
@@ -312,6 +322,7 @@ export default function NodeToolbarComponent({
     <>
       <div className="w-26 noflow nowheel nopan nodelete nodrag h-10">
         <span className="isolate inline-flex rounded-md shadow-sm">
+          {/*
           {hasCode && (
             <ShadTooltip
               content={
@@ -334,6 +345,7 @@ export default function NodeToolbarComponent({
               </button>
             </ShadTooltip>
           )}
+          */}
           {nodeLength > 0 && (
             <ShadTooltip
               content={
@@ -359,7 +371,7 @@ export default function NodeToolbarComponent({
               </button>
             </ShadTooltip>
           )}
-
+          {/*
           <ShadTooltip
             content={
               <ShortcutDisplay
@@ -393,6 +405,7 @@ export default function NodeToolbarComponent({
               />
             </button>
           </ShadTooltip>
+          */}
 
           <Select onValueChange={handleSelectChange} value="">
             <ShadTooltip content="All" side="top">
@@ -413,6 +426,7 @@ export default function NodeToolbarComponent({
               </SelectTrigger>
             </ShadTooltip>
             <SelectContent className="min-w-[14rem]">
+              {/*
               {hasCode && (
                 <SelectItem value={"code"}>
                   <ToolbarSelectItem
@@ -425,6 +439,7 @@ export default function NodeToolbarComponent({
                   />
                 </SelectItem>
               )}
+              */}
               {nodeLength > 0 && (
                 <SelectItem value={nodeLength === 0 ? "disabled" : "advanced"}>
                   <ToolbarSelectItem
@@ -449,7 +464,7 @@ export default function NodeToolbarComponent({
                   dataTestId="save-button-modal"
                 />
               </SelectItem>
-              <SelectItem value={"duplicate"}>
+              {!isStarterNode && (<SelectItem value={"duplicate"}>
                 <ToolbarSelectItem
                   shortcut={
                     shortcuts.find((obj) => obj.name === "Duplicate")?.shortcut!
@@ -459,7 +474,8 @@ export default function NodeToolbarComponent({
                   dataTestId="copy-button-modal"
                 />
               </SelectItem>
-              <SelectItem value={"copy"}>
+              )}
+              {!isStarterNode && (<SelectItem value={"copy"}>
                 <ToolbarSelectItem
                   shortcut={
                     shortcuts.find((obj) => obj.name === "Copy")?.shortcut!
@@ -469,6 +485,7 @@ export default function NodeToolbarComponent({
                   dataTestId="copy-button-modal"
                 />
               </SelectItem>
+              )}
               {isOutdated && (
                 <SelectItem value={"update"}>
                   <ToolbarSelectItem
@@ -481,6 +498,7 @@ export default function NodeToolbarComponent({
                   />
                 </SelectItem>
               )}
+              {/*
               {hasStore && (
                 <SelectItem
                   value={"Share"}
@@ -497,7 +515,7 @@ export default function NodeToolbarComponent({
                   />
                 </SelectItem>
               )}
-
+              */}
               <SelectItem
                 value={"documentation"}
                 disabled={data.node?.documentation === ""}
@@ -536,6 +554,7 @@ export default function NodeToolbarComponent({
                   />
                 </SelectItem>
               )}
+              {/*
               <SelectItem value="freeze">
                 <ToolbarSelectItem
                   shortcut={
@@ -559,6 +578,7 @@ export default function NodeToolbarComponent({
                   style={`${frozen ? " text-ice" : ""} transition-all`}
                 />
               </SelectItem>
+              */}
               <SelectItem value="Download">
                 <ToolbarSelectItem
                   shortcut={
@@ -569,7 +589,7 @@ export default function NodeToolbarComponent({
                   dataTestId="download-button-modal"
                 />
               </SelectItem>
-              <SelectItem value={"delete"} className="focus:bg-red-400/[.20]">
+              {!isStarterNode && (<SelectItem value={"delete"} className="focus:bg-red-400/[.20]">
                 <div className="font-red flex text-status-red">
                   <IconComponent
                     name="Trash2"
@@ -586,6 +606,7 @@ export default function NodeToolbarComponent({
                   </span>
                 </div>
               </SelectItem>
+              )}
             </SelectContent>
           </Select>
 
