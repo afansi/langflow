@@ -335,7 +335,6 @@ export default function GenericNode({
                 </>
               )}
             </div>
-            {/*
             {showNode && (
               <NodeStatus
                 data={data}
@@ -347,7 +346,6 @@ export default function GenericNode({
                 setBorderColor={setBorderColor}
               />
             )}
-            */}
           </div>
         </div>
 

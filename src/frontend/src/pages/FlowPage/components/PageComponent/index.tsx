@@ -48,6 +48,7 @@ import { useShortcutsStore } from "../../../../stores/shortcuts";
 import { useTypesStore } from "../../../../stores/typesStore";
 import { APIClassType } from "../../../../types/api";
 import { NodeType } from "../../../../types/flow";
+import { STARTER_NODE_TYPE } from "../../../../flow_constants";
 import {
   checkOldComponents,
   generateFlow,
@@ -281,7 +282,7 @@ export default function Page({ view }: { view?: boolean }): JSX.Element {
     e.preventDefault();
     e.stopPropagation();
     (e as unknown as Event).stopImmediatePropagation();
-    const selectedNode = nodes.filter((obj) => obj.selected);
+    const selectedNode = nodes.filter((obj) => obj.selected && obj.data.type!==STARTER_NODE_TYPE);
     if (selectedNode.length > 0) {
       paste(
         { nodes: selectedNode, edges: [] },
@@ -294,8 +295,11 @@ export default function Page({ view }: { view?: boolean }): JSX.Element {
   }
 
   function handleCopy(e: KeyboardEvent) {
-    const multipleSelection = lastSelection?.nodes
-      ? lastSelection?.nodes.length > 0
+    const starterNodeIds = lastSelection?.nodes?.filter((obj) => obj.data.type ==STARTER_NODE_TYPE).map((node) => node.id);
+    const selectedNodes = lastSelection?.nodes?.filter((obj) => obj.data.type!==STARTER_NODE_TYPE);
+    const selectedEdges = starterNodeIds ? (lastSelection ? lastSelection.edges?.filter((obj) => !starterNodeIds.includes(obj.source) && !starterNodeIds.includes(obj.target)) : []) : [];
+    const multipleSelection = selectedNodes
+      ? selectedNodes.length > 0
       : false;
     if (
       !isWrappedWithClass(e, "noflow") &&
@@ -303,8 +307,9 @@ export default function Page({ view }: { view?: boolean }): JSX.Element {
     ) {
       e.preventDefault();
       (e as unknown as Event).stopImmediatePropagation();
-      if (window.getSelection()?.toString().length === 0 && lastSelection) {
-        setLastCopiedSelection(_.cloneDeep(lastSelection));
+      if (window.getSelection()?.toString().length === 0 && selectedNodes) {
+        //setLastCopiedSelection(_.cloneDeep(lastSelection));
+        setLastCopiedSelection(_.cloneDeep({ nodes: selectedNodes, edges: selectedEdges }));
       }
     }
   }
@@ -313,8 +318,11 @@ export default function Page({ view }: { view?: boolean }): JSX.Element {
     if (!isWrappedWithClass(e, "noflow")) {
       e.preventDefault();
       (e as unknown as Event).stopImmediatePropagation();
-      if (window.getSelection()?.toString().length === 0 && lastSelection) {
-        setLastCopiedSelection(_.cloneDeep(lastSelection), true);
+      const starterNodeIds = lastSelection?.nodes?.filter((obj) => obj.data.type ==STARTER_NODE_TYPE).map((node) => node.id);
+      const selectedNodes = lastSelection?.nodes?.filter((obj) => obj.data.type!==STARTER_NODE_TYPE);
+      const selectedEdges = starterNodeIds ? (lastSelection ? lastSelection.edges?.filter((obj) => !starterNodeIds.includes(obj.source) && !starterNodeIds.includes(obj.target)) : []) : [];
+      if (window.getSelection()?.toString().length === 0 && selectedNodes) {
+        setLastCopiedSelection(_.cloneDeep({ nodes: selectedNodes, edges: selectedEdges }), true);
       }
     }
   }
@@ -345,11 +353,11 @@ export default function Page({ view }: { view?: boolean }): JSX.Element {
         track("Component Connection Deleted");
       }
       if (lastSelection.nodes?.length) {
-        lastSelection.nodes.forEach((n) => {
+        lastSelection.nodes.filter((obj) => obj.data.type!==STARTER_NODE_TYPE).forEach((n) => {
           track("Component Deleted", { componentType: n.data.type });
         });
       }
-      deleteNode(lastSelection.nodes.map((node) => node.id));
+      deleteNode(lastSelection.nodes.filter((obj) => obj.data.type!==STARTER_NODE_TYPE).map((node) => node.id));
       deleteEdge(lastSelection.edges.map((edge) => edge.id));
     }
   }

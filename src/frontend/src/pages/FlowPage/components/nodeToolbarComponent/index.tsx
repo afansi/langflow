@@ -27,6 +27,7 @@ import { useShortcutsStore } from "../../../../stores/shortcuts";
 import { useStoreStore } from "../../../../stores/storeStore";
 import { nodeToolbarPropsType } from "../../../../types/components";
 import { FlowType } from "../../../../types/flow";
+import { STARTER_NODE_TYPE } from "../../../../flow_constants";
 import {
   createFlowComponent,
   downloadNode,
@@ -213,7 +214,7 @@ export default function NodeToolbarComponent({
     showconfirmShare,
   ]);
 
-  const isStarterNode = data.node!.type == "Starter";
+  const isStarterNode = data.type == STARTER_NODE_TYPE;
 
   const handleSelectChange = (event) => {
     switch (event) {

@@ -1,4 +1,11 @@
 /**
+ * Starter Type
+ * @constant
+ */
+
+export const STARTER_NODE_TYPE: string = "Starter";
+
+/**
  * Default description for the flow
  * @constant
  */

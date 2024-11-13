@@ -37,6 +37,7 @@ import {
   sourceHandleType,
   targetHandleType,
 } from "../types/flow";
+import { STARTER_NODE_TYPE } from "../flow_constants";
 import {
   addEscapedHandleIdsToEdgesType,
   findLastNodeType,
@@ -1064,6 +1065,15 @@ export function validateSelection(
     )
   ) {
     errorsArray.push("Select non-input/output components only");
+  }
+
+  //chek if starter node
+  if (
+    clonedSelection.nodes.some(
+      (node) => node.data.type == STARTER_NODE_TYPE
+    )
+  ) {
+    errorsArray.push("Select non Starter components only");
   }
   //check if there are two or more nodes with free outputs
   if (

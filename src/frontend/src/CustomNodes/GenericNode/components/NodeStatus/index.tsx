@@ -146,6 +146,7 @@ export default function NodeStatus({
   return (
     <>
       <div className="flex flex-shrink-0 items-center gap-2">
+        {/*
         <ShadTooltip
           content={
             buildStatus === BuildStatus.BUILDING ? (
@@ -203,6 +204,7 @@ export default function NodeStatus({
             </div>
           </Button>
         )}
+        */}
       </div>
     </>
   );
