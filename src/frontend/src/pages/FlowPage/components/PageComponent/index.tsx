@@ -47,15 +47,17 @@ import useFlowsManagerStore from "../../../../stores/flowsManagerStore";
 import { useShortcutsStore } from "../../../../stores/shortcuts";
 import { useTypesStore } from "../../../../stores/typesStore";
 import { APIClassType } from "../../../../types/api";
-import { NodeType } from "../../../../types/flow";
+import { NodeType, sourceHandleType, targetHandleType, } from "../../../../types/flow";
 import { STARTER_NODE_TYPE } from "../../../../flow_constants";
 import {
   checkOldComponents,
   generateFlow,
   generateNodeFromFlow,
   getNodeId,
+  getHandleId,
   isValidConnection,
   scapeJSONParse,
+  scapedJSONStringfy,
   updateIds,
   validateSelection,
 } from "../../../../utils/reactflowUtils";
@@ -196,7 +198,7 @@ export default function Page({ view }: { view?: boolean }): JSX.Element {
       const clonedEdges = cloneDeep(edges);
       const clonedSelection = cloneDeep(lastSelection);
       updateIds({ nodes: clonedNodes, edges: clonedEdges }, clonedSelection!);
-      const { newFlow } = generateFlow(
+      const { newFlow, removedEdges } = generateFlow(
         clonedSelection!,
         clonedNodes,
         clonedEdges,
@@ -214,6 +216,60 @@ export default function Page({ view }: { view?: boolean }): JSX.Element {
         ),
         newGroupNode,
       ]);
+
+      const alteredEdges: Array<Edge> = [];
+      removedEdges.forEach((edge: Edge) => {
+        if(newFlow.data?.nodes.some((node) => node.id === edge.target)){
+          let targetHandle: targetHandleType = scapeJSONParse(
+            edge.targetHandle!,
+          );
+          let oldFieldName = targetHandle.fieldName;
+          let oldTargetId = edge.target;
+
+          targetHandle.id = newGroupNode.id;
+          targetHandle.fieldName = oldFieldName + "_" + oldTargetId;
+          targetHandle.proxy = { id: oldTargetId, field: oldFieldName }
+
+          edge.target = newGroupNode.id;
+          edge.targetHandle = scapedJSONStringfy(targetHandle);
+
+          edge.id = getHandleId(edge.source, edge.sourceHandle!, edge.target, edge.targetHandle);
+
+          if (edge.data?.targetHandle) {
+            edge.data.targetHandle = targetHandle;
+          }
+          
+        }else if (newFlow.data?.nodes.some((node) => node.id === edge.source)){
+          let sourceHandle: sourceHandleType = scapeJSONParse(
+            edge.sourceHandle!,
+          );
+          let oldName = sourceHandle.name;
+          let oldSourceId = edge.source;
+
+          sourceHandle.dataType = "GroupNode";
+          sourceHandle.id = newGroupNode.id;
+          sourceHandle.name = oldSourceId + "_" + oldName;
+
+          edge.source = newGroupNode.id;
+          edge.sourceHandle = scapedJSONStringfy(sourceHandle);
+
+          edge.id = getHandleId(edge.source, edge.sourceHandle, edge.target, edge.targetHandle!);
+
+          if (edge.data?.sourceHandle) {
+            edge.data.sourceHandle = sourceHandle;
+          }
+        }
+        alteredEdges.push(edge);
+      });
+      setEdges([
+        ...clonedEdges.filter(
+          (oldEdge) =>
+            clonedSelection?.nodes.some((node) => node.id === oldEdge.target) &&
+          clonedSelection?.nodes.some((node) => node.id === oldEdge.source),
+        )].concat(alteredEdges)
+      );
+      
+
     } else {
       setErrorData({
         title: INVALID_SELECTION_ERROR_ALERT,

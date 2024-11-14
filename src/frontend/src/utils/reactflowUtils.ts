@@ -1143,11 +1143,13 @@ export function mergeNodeTemplates({
           } else {
             template[key + "_" + node.id].display_name =
               //data id already has the node name on it
-              nodeTemplate[key].display_name
-                ? nodeTemplate[key].display_name
-                : nodeTemplate[key].name
-                  ? toTitleCase(nodeTemplate[key].name)
-                  : toTitleCase(key);
+              node.data.node!.display_name + " - " + (
+                nodeTemplate[key].display_name
+                  ? nodeTemplate[key].display_name
+                  : nodeTemplate[key].name
+                    ? toTitleCase(nodeTemplate[key].name)
+                    : toTitleCase(key)
+              );
           }
         }
       });
@@ -1262,10 +1264,10 @@ function generateNodeOutputs(flow: FlowType) {
                 id: node.id,
                 name: output.name,
                 nodeDisplayName:
-                  node.data.node!.display_name ?? node.data.node!.name,
+                  node.type === "groupNode"? node.data.node!.flow!.name : (node.data.node!.display_name ?? node.data.node!.name),
               },
               name: node.id + "_" + output.name,
-              display_name: output.display_name,
+              display_name: (node.type === "groupNode"? node.data.node!.flow!.name : node.data.node!.display_name) + " - " + output.display_name,
             }),
           );
         }
