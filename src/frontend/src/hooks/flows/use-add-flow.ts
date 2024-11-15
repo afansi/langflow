@@ -6,6 +6,7 @@ import { useFolderStore } from "@/stores/foldersStore";
 import { useGlobalVariablesStore } from "@/stores/globalVariablesStore/globalVariables";
 import { useTypesStore } from "@/stores/typesStore";
 import { FlowType } from "@/types/flow";
+import {STARTER_NODE_VALUE} from "@/flow_constants";
 import {
   addVersionToDuplicates,
   createNewFlow,
@@ -44,7 +45,7 @@ const useAddFlow = () => {
     new_blank?: boolean;
   }) => {
     return new Promise(async (resolve, reject) => {
-      const flow = cloneDeep(params?.flow) ?? undefined;
+      const flow = cloneDeep(params?.flow) ?? STARTER_NODE_VALUE; //undefined;
       let flowData = flow
         ? await processDataFromFlow(flow)
         : { nodes: [], edges: [], viewport: { zoom: 1, x: 0, y: 0 } };

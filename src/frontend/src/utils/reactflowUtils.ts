@@ -1772,7 +1772,7 @@ export function updateGroupRecursion(
     updateProxyIdsOnTemplate(groupNode.data.node!.template, idsMap);
     updateProxyIdsOnOutputs(groupNode.data.node.outputs, idsMap);
     let flowEdges = edges;
-    updateEdgesIds(flowEdges, idsMap); //, groupNode.data.id
+    updateEdgesIds(flowEdges, idsMap);
   }
 }
 

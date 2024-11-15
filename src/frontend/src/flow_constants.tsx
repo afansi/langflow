@@ -1,9 +1,162 @@
+import { FlowType } from "@/types/flow";
+
 /**
  * Starter Type
  * @constant
  */
 
 export const STARTER_NODE_TYPE: string = "Starter";
+
+/**
+ * Starter Type
+ * @constant
+ */
+
+export const STARTER_NODE_VALUE: FlowType = {
+  "id": "ab68cb5b-48c1-49d5-a9a6-b76ec9b3de9d",
+  "data":
+  {
+      "nodes":
+      [
+          {
+              "id": "Starter-zzh2C",
+              "type": "genericNode",
+              "position":
+              {
+                  "x": 262,
+                  "y": 203
+              },
+              "data":
+              {
+                  "type": "Starter",
+                  "node":
+                  {
+                      "template":
+                      {
+                          "_type": "Component",
+                          "code":
+                          {
+                              "type": "code",
+                              "required": true,
+                              "placeholder": "",
+                              "list": false,
+                              "show": true,
+                              "multiline": true,
+                              "value": "# from langflow.field_typing import Data\nfrom langflow.custom import Component\nfrom langflow.io import MessageTextInput, Output, HandleInput\nfrom langflow.schema import Data\nimport random\n\n\nclass StarterComponent(Component):\n    display_name = \"Starter\"\n    description = \"Starter component that trigger the flow execution.\"\n    documentation: str = \"http://docs.langflow.org/components/custom\"\n    icon = \"custom_components\"\n    name = \"Starter\"\n\n    inputs = [\n        # MessageTextInput(name=\"input_value\", display_name=\"Input Value\", value=\"Hello, World!\"),\n    ]\n\n    outputs = [\n        Output(display_name=\"Incoming Message\", name=\"incoming_message_event\", method=\"build_output_1\", max_connections=1),\n        Output(display_name=\"Incoming Conversation\", name=\"incoming_conversation_event\", method=\"build_output_2\", max_connections=1),\n        Output(display_name=\"REST API\", name=\"rest_api_event\", method=\"build_output_3\", max_connections=1),\n        Output(display_name=\"SubModule\", name=\"sub_module_envent\", method=\"build_output_4\", max_connections=1),\n    ]\n    \n    \n    def update_status(self, code: int) -> dict:\n        if(self.status is None or (not isinstance(self.status, dict))):\n            self.status = {}\n        self.status['output_code'] = code\n        return self.status\n\n    def build_output_1(self) -> bool:\n        self.status = None\n        val1 = bool(random.getrandbits(1))\n        if(val1):\n            self.update_status(1)\n        elif bool(random.getrandbits(1)):\n            self.update_status(2)\n        elif bool(random.getrandbits(1)):\n            self.update_status(3)\n        elif bool(random.getrandbits(1)):\n            self.update_status(4)\n        return val1\n\n    def build_output_2(self) -> bool:\n        return (self.status and isinstance(self.status, dict) and self.status.get('output_code') == 2)\n\n    def build_output_3(self) -> bool:\n        return (self.status and isinstance(self.status, dict) and self.status.get('output_code') == 3)\n\n    def build_output_4(self) -> bool:\n        return (self.status and isinstance(self.status, dict) and self.status.get('output_code') == 4)\n\n",
+                              "fileTypes":
+                              [],
+                              "file_path": "",
+                              "password": false,
+                              "name": "code",
+                              "advanced": true,
+                              "dynamic": true,
+                              "info": "",
+                              "load_from_db": false,
+                              "title_case": false,
+                              "can_accept_multiple_edges": false
+                          }
+                      },
+                      "description": "Starter component that trigger the flow execution.",
+                      "icon": "custom_components",
+                      "base_classes":
+                      [
+                          "bool"
+                      ],
+                      "display_name": "Starter",
+                      "documentation": "http://docs.langflow.org/components/custom",
+                      "custom_fields":
+                      {},
+                      "output_types":
+                      [],
+                      "pinned": false,
+                      "conditional_paths":
+                      [],
+                      "frozen": false,
+                      "outputs":
+                      [
+                          {
+                              "types":
+                              [
+                                  "bool"
+                              ],
+                              "selected": "bool",
+                              "name": "incoming_message_event",
+                              "display_name": "Incoming Message",
+                              "method": "build_output_1",
+                              "value": "__UNDEFINED__",
+                              "cache": true,
+                              "max_connections": 1
+                          },
+                          {
+                              "types":
+                              [
+                                  "bool"
+                              ],
+                              "selected": "bool",
+                              "name": "incoming_conversation_event",
+                              "display_name": "Incoming Conversation",
+                              "method": "build_output_2",
+                              "value": "__UNDEFINED__",
+                              "cache": true,
+                              "max_connections": 1
+                          },
+                          {
+                              "types":
+                              [
+                                  "bool"
+                              ],
+                              "selected": "bool",
+                              "name": "rest_api_event",
+                              "display_name": "REST API",
+                              "method": "build_output_3",
+                              "value": "__UNDEFINED__",
+                              "cache": true,
+                              "max_connections": 1
+                          },
+                          {
+                              "types":
+                              [
+                                  "bool"
+                              ],
+                              "selected": "bool",
+                              "name": "sub_module_envent",
+                              "display_name": "SubModule",
+                              "method": "build_output_4",
+                              "value": "__UNDEFINED__",
+                              "cache": true,
+                              "max_connections": 1
+                          }
+                      ],
+                      "field_order":
+                      [],
+                      "beta": false,
+                      "edited": false,
+                      "metadata":
+                      {}
+                  },
+                  "id": "Starter-zzh2C"
+              },
+              "selected": true,
+              "width": 384,
+              "height": 339,
+              "dragging": false
+          }
+      ],
+      "edges":
+      [],
+      "viewport":
+      {
+          "x": 0,
+          "y": 0,
+          "zoom": 1
+      }
+  },
+  "description": "Generate, Innovate, Communicate.",
+  "name": "Untitled document",
+  "endpoint_name": null,
+  "is_component": false
+};
+
 
 /**
  * Default description for the flow
