@@ -1382,10 +1382,51 @@ export function expandGroupNode(
   setEdges: (update: Edge[] | ((oldState: Edge[]) => Edge[])) => void,
   outputs?: OutputFieldType[],
 ) {
+
+  let nonAffectedEdges = edges.filter((e) => e.target !== id && e.source !== id);
+  let affectedEdges = edges.filter((e) => e.target === id || e.source === id);
   const idsMap = updateIds(flow!.data!);
+
   updateProxyIdsOnTemplate(template, idsMap);
-  let flowEdges = edges;
+  
+  let flowEdges = affectedEdges; //edges;
   updateEdgesIds(flowEdges, idsMap);
+
+  flowEdges.forEach((edge) => {
+    let sourceHandle: sourceHandleType = edge.data.sourceHandle;
+    if (sourceHandle.dataType === "GroupNode" && sourceHandle.id === id) {
+      let outputName = sourceHandle.name;
+      let outputIndex = outputs!.findIndex((o) => o.name === outputName);
+      if(outputIndex!==-1 && outputs![outputIndex].proxy){
+        let oldId = outputs![outputIndex].proxy.id;
+        let oldField = outputs![outputIndex].proxy.name;
+        sourceHandle.id = idsMap[oldId];
+        sourceHandle.name = oldField;
+        let nodeIndex = flow!.data!.nodes.findIndex((n) => n.id === idsMap[oldId]);
+        if(nodeIndex !== -1){
+          sourceHandle.dataType = flow!.data!.nodes[nodeIndex].data.type;
+        }
+      }     
+    }
+
+    edge.data.sourceHandle = sourceHandle;
+    edge.source = sourceHandle.id;
+    edge.sourceHandle = scapedJSONStringfy(sourceHandle);
+
+
+    let targetHandle: targetHandleType = edge.data.targetHandle;
+    if (targetHandle.proxy && targetHandle.proxy!.id) {
+      targetHandle.id = targetHandle.proxy!.id;
+      targetHandle.fieldName = targetHandle.proxy!.field;
+      delete targetHandle.proxy;
+    }
+    edge.data.targetHandle = targetHandle;
+    edge.target = targetHandle.id;
+    edge.targetHandle = scapedJSONStringfy(targetHandle);
+
+    edge.id = getHandleId(edge.source, edge.sourceHandle, edge.target, edge.targetHandle!);
+  });
+  
   const gNodes: NodeType[] = cloneDeep(flow?.data?.nodes!);
   const gEdges = cloneDeep(flow!.data!.edges);
   // //redirect edges to correct proxy node
@@ -1481,11 +1522,25 @@ export function expandGroupNode(
       }
     }
   });
+
+  
   const filteredNodes = [...nodes.filter((n) => n.id !== id), ...gNodes];
   const filteredEdges = [
-    ...edges.filter((e) => e.target !== id && e.source !== id),
+    ...nonAffectedEdges,
     ...gEdges,
+    ...affectedEdges,
   ];
+  /*
+  const filteredEdges: Array<Edge> = [];
+  const filteredEdgeIdSet: Set<string> = new Set<string>();
+  myEdges.forEach((edge: Edge) => {
+    if(!filteredEdgeIdSet.has(edge.id)){
+      filteredEdges.push(edge);
+      filteredEdgeIdSet.add(edge.id);
+    }
+  });
+  */
+
   setNodes(filteredNodes);
   setEdges(filteredEdges);
 }
@@ -1714,7 +1769,7 @@ export function updateGroupRecursion(
     updateProxyIdsOnTemplate(groupNode.data.node!.template, idsMap);
     updateProxyIdsOnOutputs(groupNode.data.node.outputs, idsMap);
     let flowEdges = edges;
-    updateEdgesIds(flowEdges, idsMap);
+    updateEdgesIds(flowEdges, idsMap); //, groupNode.data.id
   }
 }
 

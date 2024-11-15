@@ -261,13 +261,25 @@ export default function Page({ view }: { view?: boolean }): JSX.Element {
         }
         alteredEdges.push(edge);
       });
-      setEdges([
+
+      const myEdges = [
         ...clonedEdges.filter(
           (oldEdge) =>
-            clonedSelection?.nodes.some((node) => node.id === oldEdge.target) &&
-          clonedSelection?.nodes.some((node) => node.id === oldEdge.source),
-        )].concat(alteredEdges)
-      );
+            !clonedSelection?.nodes.some((node) => node.id === oldEdge.target) &&
+          !clonedSelection?.nodes.some((node) => node.id === oldEdge.source),
+        ),
+        ...alteredEdges,
+      ];
+      const filteredEdges: Array<Edge> = [];
+      const filteredEdgeIdSet: Set<string> = new Set<string>();
+      myEdges.forEach((edge: Edge) => {
+        if(!filteredEdgeIdSet.has(edge.targetHandle + "#" + edge.sourceHandle)){
+          filteredEdges.push(edge);
+          filteredEdgeIdSet.add(edge.targetHandle + "#" + edge.sourceHandle);
+        }
+      });
+
+      setEdges(filteredEdges);
       
 
     } else {
