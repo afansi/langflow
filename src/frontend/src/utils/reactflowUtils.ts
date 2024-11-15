@@ -1418,7 +1418,20 @@ export function expandGroupNode(
     if (targetHandle.proxy && targetHandle.proxy!.id) {
       targetHandle.id = targetHandle.proxy!.id;
       targetHandle.fieldName = targetHandle.proxy!.field;
-      delete targetHandle.proxy;
+
+      let nodeIndex = flow!.data!.nodes.findIndex((n) => n.id === targetHandle.proxy!.id);
+
+      const myKey = targetHandle.proxy!.field;
+
+      if(nodeIndex !== -1){
+        if (flow!.data!.nodes[nodeIndex].data.node!.template[myKey].proxy) {
+          targetHandle.proxy = flow!.data!.nodes[nodeIndex].data.node!.template[myKey].proxy;
+        }else{
+          delete targetHandle.proxy;
+        }
+      }else{
+        delete targetHandle.proxy;
+      }      
     }
     edge.data.targetHandle = targetHandle;
     edge.target = targetHandle.id;
@@ -1477,7 +1490,7 @@ export function expandGroupNode(
   //update template values
   Object.keys(template).forEach((key) => {
     if (template[key].proxy) {
-      let { field, id } = template[key].proxy!;
+      const { field, id } = template[key].proxy!;
       let nodeIndex = gNodes.findIndex((n) => n.id === id);
       if (nodeIndex !== -1) {
         let proxy: { id: string; field: string } | undefined;
@@ -1530,16 +1543,6 @@ export function expandGroupNode(
     ...gEdges,
     ...affectedEdges,
   ];
-  /*
-  const filteredEdges: Array<Edge> = [];
-  const filteredEdgeIdSet: Set<string> = new Set<string>();
-  myEdges.forEach((edge: Edge) => {
-    if(!filteredEdgeIdSet.has(edge.id)){
-      filteredEdges.push(edge);
-      filteredEdgeIdSet.add(edge.id);
-    }
-  });
-  */
 
   setNodes(filteredNodes);
   setEdges(filteredEdges);
