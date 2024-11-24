@@ -54,6 +54,12 @@ export type KeyPairListComponentType = {
   isList?: boolean;
 };
 
+export type ConditionListComponentType = {
+  value: any;
+  nodeId: string,
+  isList?: boolean;
+};
+
 export type StrRenderComponentType = {
   templateData: Partial<InputFieldType>;
   name: string;

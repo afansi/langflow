@@ -522,3 +522,28 @@ export const NOUNS: string[] = [
   "zuse",
   "carroll",
 ];
+
+export const OPERANDS: string[] = [
+  "contains",
+  "doesNotContain",
+  "doesNotMatchAnyOf",
+  "doesNotStartWith",
+  "equalTo",
+  "greaterThan",
+  "isAfterDate",
+  "isAfterTime",
+  "isBeforeDate",
+  "isBeforeTime",
+  "isBlank",
+  "isNotBlank",
+  "lessThan",
+  "matchesAnyOf",
+  "notEqualTo",
+  "regex",
+  "startsWith",
+  ];
+  
+  export const OPERANDS_WITH_NO_VALUES: string[] = [
+  "isBlank",
+  "isNotBlank",
+  ];

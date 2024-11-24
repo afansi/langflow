@@ -141,7 +141,7 @@ export default function NodeOutputField({
                   disabledOutput ? "text-muted-foreground" : "",
                 )}
                 strokeWidth={1.5}
-                name={data.node?.outputs![index].hidden ? "EyeOff" : "Eye"}
+                name={data.node?.outputs![index]?.hidden ? "EyeOff" : "Eye"}
               />
             </Button>
           </div>
@@ -158,8 +158,8 @@ export default function NodeOutputField({
                 idx={index}
                 types={type?.split("|") ?? []}
                 selected={
-                  data.node?.outputs![index].selected ??
-                  data.node?.outputs![index].types[0] ??
+                  data.node?.outputs![index]?.selected ??
+                  data.node?.outputs![index]?.types[0] ??
                   title
                 }
                 nodeId={data.id}
