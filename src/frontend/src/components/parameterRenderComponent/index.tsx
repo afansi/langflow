@@ -13,6 +13,7 @@ import InputFileComponent from "./components/inputFileComponent";
 import InputListComponent from "./components/inputListComponent";
 import IntComponent from "./components/intComponent";
 import KeypairListComponent from "./components/keypairListComponent";
+import ConditionListComponent from "./components/conditionListComponent";
 import LinkComponent from "./components/linkComponent";
 import MultiselectComponent from "./components/multiselectComponent";
 import PromptAreaComponent from "./components/promptComponent";
@@ -104,6 +105,15 @@ export function ParameterRenderComponent({
             {...baseInputProps}
             isList={templateData.list ?? false}
             id={`keypair_${id}`}
+          />
+        );
+      case "conditionList":
+        return (
+          <ConditionListComponent
+            {...baseInputProps}
+            isList={templateData.list ?? true}
+            id={`conditionalEdge_${id}`}
+            nodeId={nodeId}
           />
         );
       case "bool":

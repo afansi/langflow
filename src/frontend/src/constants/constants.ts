@@ -652,6 +652,7 @@ export const LANGFLOW_SUPPORTED_TYPES = new Set([
   "table",
   "link",
   "slider",
+  "conditionList",
 ]);
 
 export const priorityFields = new Set(["code", "template"]);
