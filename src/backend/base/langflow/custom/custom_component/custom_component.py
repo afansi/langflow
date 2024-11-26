@@ -54,6 +54,8 @@ class CustomComponent(BaseComponent):
     """The display name of the component. Defaults to None."""
     description: str | None = None
     """The description of the component. Defaults to None."""
+    output_variables: dict | None = None
+    """The output variables of the component. It is of the form variable key:type. Defaults to None."""
     icon: str | None = None
     """The icon of the component. It should be an emoji. Defaults to None."""
     is_input: bool | None = None
