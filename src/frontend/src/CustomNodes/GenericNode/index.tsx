@@ -301,6 +301,7 @@ export default function GenericNode({
                     display_name={data.node?.display_name}
                     nodeId={data.id}
                     selected={selected}
+                    display_id={data.node?.display_id}
                   />
                   {isOutdated && !isUserEdited && (
                     <ShadTooltip content={TOOLTIP_OUTDATED_NODE}>
