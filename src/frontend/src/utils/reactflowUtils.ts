@@ -1456,7 +1456,7 @@ export function expandGroupNode(
 
 
     let targetHandle: targetHandleType = edge.data.targetHandle;
-    if (targetHandle.proxy && targetHandle.proxy!.id) {
+    if (targetHandle.proxy && targetHandle.proxy!.id && targetHandle.id === id) {
       targetHandle.id = targetHandle.proxy!.id;
       targetHandle.fieldName = targetHandle.proxy!.field;
 
