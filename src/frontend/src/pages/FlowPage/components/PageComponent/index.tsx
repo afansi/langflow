@@ -60,6 +60,7 @@ import {
   scapedJSONStringfy,
   updateIds,
   validateSelection,
+  addVersionToDisplayIdDuplicates,
 } from "../../../../utils/reactflowUtils";
 import ConnectionLineComponent from "../ConnectionLineComponent";
 import SelectionMenu from "../SelectionMenuComponent";
@@ -119,6 +120,15 @@ export default function Page({ view }: { view?: boolean }): JSX.Element {
 
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [isHighlightingCursor, setIsHighlightingCursor] = useState(false);
+
+  //force display_id
+  nodes.forEach((n) => {
+    if(n.data.node){
+      n.data.node.display_id = addVersionToDisplayIdDuplicates(
+        n.id, n.data.type, nodes, n.data.node.display_id
+      );
+    }    
+  });
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -205,7 +215,17 @@ export default function Page({ view }: { view?: boolean }): JSX.Element {
         getRandomName(),
       );
 
-      const newGroupNode = generateNodeFromFlow(newFlow, getNodeId);
+      let groupVariables = {}
+      newFlow?.data?.nodes.forEach((node) => {
+        groupVariables = {
+          ...groupVariables,
+          ...(node?.data?.node?.output_variables ?? {})
+        };
+      });
+
+      const myGroupVariables = {...groupVariables };
+
+      const newGroupNode = generateNodeFromFlow(newFlow, myGroupVariables, getNodeId);
 
       setNodes([
         ...clonedNodes.filter(
@@ -617,6 +637,8 @@ export default function Page({ view }: { view?: boolean }): JSX.Element {
             display_name: "",
             documentation: "",
             template: {},
+            output_variables: {},
+            display_id: getNodeId("note").replace("-", "_"), 
           },
           type: "note",
         };

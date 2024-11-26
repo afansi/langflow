@@ -557,6 +557,44 @@ export function addVersionToDuplicates(flow: FlowType, flows: FlowType[]) {
   return newName;
 }
 
+export function getNodeDisplayIdRecursion(item: NodeType): string[]{
+
+  const result: string[] = [];
+  if (item.data?.node?.flow) {
+    item.data.node.flow.data!.nodes.forEach((node) => {    
+      const nRes = getNodeDisplayIdRecursion(node);
+      nRes.forEach((a) => result.push(a));
+      
+    });
+  }
+  if(item.data?.node?.display_id){
+    result.push(item.data.node.display_id);
+  }
+  return result;
+}
+
+export function addVersionToDisplayIdDuplicates(nodeId:string, type: string, nodes:Node[], displayId?: string) {  
+  const nodesWithoutUpdatedNode = nodes.filter((f) => f.id !== nodeId);
+
+  if(displayId===undefined){
+    displayId = (type!=="note" && type!=="GroupNode") ? type + "_1" : getNodeId(type==="GroupNode"?"Group":type).replace("-", "_");
+  }
+
+  const existingNames = nodesWithoutUpdatedNode.map((node) => {
+    return getNodeDisplayIdRecursion(node);
+  }).flat(1);
+
+  let newName = displayId;
+  let count = 1;
+
+  while (existingNames.includes(newName)) {
+    newName = (type!=="note" && type!=="GroupNode") ? `${type}_${count}`  : getNodeId(type==="GroupNode"?"Group":type).replace("-", "_");
+    count++;
+  }
+
+  return newName;
+}
+
 export function addEscapedHandleIdsToEdges({
   edges,
 }: addEscapedHandleIdsToEdgesType): Edge[] {
@@ -1215,6 +1253,7 @@ export function generateNodeTemplate(Flow: FlowType) {
 
 export function generateNodeFromFlow(
   flow: FlowType,
+  groupVariables: any,
   getNodeId: (type: string) => string,
 ): NodeType {
   const { nodes } = flow.data!;
@@ -1230,6 +1269,8 @@ export function generateNodeFromFlow(
         display_name: "Group",
         documentation: "",
         description: "",
+        display_id: getNodeId("Group").replace("-", "_"),
+        output_variables: groupVariables,
         template: generateNodeTemplate(data),
         flow: data,
         outputs: generateNodeOutputs(data),
@@ -1744,6 +1785,7 @@ export function isOutputType(type: string): boolean {
 export function updateGroupRecursion(
   groupNode: NodeType,
   edges: Edge[],
+  nodes: Node[],
   unavailableFields:
     | {
         [name: string]: string;
@@ -1758,10 +1800,15 @@ export function updateGroupRecursion(
   );
   if (groupNode.data.node?.flow) {
     groupNode.data.node.flow.data!.nodes.forEach((node) => {
+      // Update Display Id
+      if(node.data.node){
+        node.data.node.display_id = addVersionToDisplayIdDuplicates(groupNode.id, node.data.type, nodes, node.data.node?.display_id);
+      }
       if (node.data.node?.flow) {
         updateGroupRecursion(
           node,
           node.data.node.flow.data!.edges,
+          nodes,
           unavailableFields,
           globalVariablesEntries,
         );

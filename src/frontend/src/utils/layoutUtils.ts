@@ -11,7 +11,7 @@ const layoutOptions = {
   "elk.layered.spacing.edgeNodeBetweenLayers": "40",
   "elk.spacing.nodeNode": "40",
   "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
-  "elk.separateConnectedComponents": true,
+  "elk.separateConnectedComponents": "true",
   "elk.layered.crossingMinimization.strategy": "LAYER_SWEEP",
   "elk.spacing.componentComponent": `${NODE_WIDTH}`,
   "elk.layered.considerModelOrder.strategy": "NODES_AND_EDGES",

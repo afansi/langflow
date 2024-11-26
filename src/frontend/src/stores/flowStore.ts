@@ -41,6 +41,7 @@ import {
   scapedJSONStringfy,
   updateGroupRecursion,
   validateNodes,
+  addVersionToDisplayIdDuplicates,
 } from "../utils/reactflowUtils";
 import { getInputsAndOutputs } from "../utils/storeUtils";
 import useAlertStore from "./alertStore";
@@ -370,9 +371,14 @@ const useFlowStore = create<FlowStoreType>((set, get) => ({
           id: newId,
         },
       };
+      // Update Display Id
+      if(newNode.data.node){
+        newNode.data.node.display_id = addVersionToDisplayIdDuplicates(newId, newNode.data.type, newNodes, newNode.data.node?.display_id);
+      }
       updateGroupRecursion(
         newNode,
         selection.edges,
+        newNodes,
         useGlobalVariablesStore.getState().unavailableFields,
         useGlobalVariablesStore.getState().globalVariablesEntries,
       );

@@ -8,8 +8,10 @@ export default function NodeName({
   display_name,
   selected,
   nodeId,
+  display_id,
 }: {
   display_name?: string;
+  display_id?: string;
   selected: boolean;
   nodeId: string;
 }) {
@@ -26,6 +28,10 @@ export default function NodeName({
   useEffect(() => {
     setNodeName(display_name);
   }, [display_name]);
+
+  const hasDisplayId: boolean = display_id!==undefined && display_id.trim().length > 0;
+  const displayIdElt1 = hasDisplayId ? <br/> : <div></div>;
+  const displayIdElt2 = hasDisplayId ? <div>({display_id})</div> : <div></div>;
 
   return inputName ? (
     <div className="w-full">
@@ -70,6 +76,8 @@ export default function NodeName({
           className="nodoubleclick w-full cursor-text truncate text-primary"
         >
           {display_name}
+          {hasDisplayId && (displayIdElt1)}
+          {hasDisplayId && (displayIdElt2)}
         </div>
       </ShadTooltip>
     </div>

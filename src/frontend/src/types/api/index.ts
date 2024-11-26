@@ -34,6 +34,8 @@ export type APIClassType = {
   description: string;
   template: APITemplateType;
   display_name: string;
+  display_id: string;
+  output_variables?: any;
   icon?: string;
   edited?: boolean;
   is_input?: boolean;

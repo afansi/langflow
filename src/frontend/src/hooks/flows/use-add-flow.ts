@@ -5,6 +5,7 @@ import useFlowsManagerStore from "@/stores/flowsManagerStore";
 import { useFolderStore } from "@/stores/foldersStore";
 import { useGlobalVariablesStore } from "@/stores/globalVariablesStore/globalVariables";
 import { useTypesStore } from "@/stores/typesStore";
+import useFlowStore from "@/stores/flowStore";
 import { FlowType } from "@/types/flow";
 import {STARTER_NODE_VALUE} from "@/flow_constants";
 import {
@@ -39,6 +40,8 @@ const useAddFlow = () => {
   const { mutate: postAddFlow } = usePostAddFlow();
   const { mutate: refreshFlows } = useGetRefreshFlows();
 
+  const nodes = useFlowStore((state) => state.nodes);
+
   const addFlow = async (params?: {
     flow?: FlowType;
     override?: boolean;
@@ -53,6 +56,7 @@ const useAddFlow = () => {
         updateGroupRecursion(
           node,
           flowData?.edges,
+          nodes,
           unavaliableFields,
           globalVariablesEntries,
         );
