@@ -57,6 +57,8 @@ export default function ConditionListComponent({
   const nodeIndex = nodes.findIndex((n) => n.id === nodeId);
 
   const nodeData: NodeDataType = nodeIndex !== -1 ? nodes[nodeIndex].data : undefined;
+  
+  const isGroupNode: boolean = nodeData?.type === "GroupNode";
 
   const operandWithNoValueSets = new Set<string>(OPERANDS_WITH_NO_VALUES);
 
@@ -197,7 +199,7 @@ export default function ConditionListComponent({
             className=""
             data-testid={`value_${id}_x`}
           />
-          <Button
+          {!isGroupNode && (<Button
             unstyled
             className={getButtonClassName()}
             onClick={addNewInput}
@@ -209,6 +211,7 @@ export default function ConditionListComponent({
               className="h-4 w-4"
             />
           </Button>
+          )}
       </div>
       {value.map((singleValue, index) => (
         <div key={index} className="flex w-full gap-2">
@@ -230,7 +233,7 @@ export default function ConditionListComponent({
             onChange={(event) => handleValueInputChange(index, event.target.value)}
             data-testid={`value_${id}_${index}`}
           />
-          <Button
+          {!isGroupNode && (<Button
             unstyled
             className={getButtonClassName()}
             onClick={(e) => removeInput(index, e)}
@@ -242,6 +245,7 @@ export default function ConditionListComponent({
               className="h-4 w-4"
             />
           </Button>
+          )}
         </div>
       ))}
     </div>
