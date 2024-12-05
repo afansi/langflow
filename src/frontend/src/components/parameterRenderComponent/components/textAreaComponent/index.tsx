@@ -1,10 +1,13 @@
 import ComponentTextModal from "@/modals/textAreaModal";
 import { classNames } from "@/utils/utils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import IconComponent from "../../../genericIconComponent";
 import { Button } from "../../../ui/button";
 import { Textarea } from "../../../ui/textarea";
 import { InputProps, TextAreaComponentType } from "../../types";
+import useFlowStore from "../../../../stores/flowStore";
+import {getSuggetionListFromOutputVariables,} from "../../../../utils/reactflowUtils";
+import {useGetGlobalVariables,} from "@/controllers/API/queries/variables";
 
 export default function TextAreaComponent({
   value,
@@ -14,6 +17,7 @@ export default function TextAreaComponent({
   id = "",
   password,
   updateVisibility,
+  isInput = false,
 }: InputProps<string, TextAreaComponentType>): JSX.Element {
   // Clear text area
   useEffect(() => {
@@ -21,6 +25,13 @@ export default function TextAreaComponent({
       handleOnNewValue({ value: "" }, { skipSnapshot: true });
     }
   }, [disabled]);
+  const [inputValue1, setInputValue] = useState(value);
+
+  const nodes = useFlowStore((state) => state.nodes);
+  const { data: globalVariables } = useGetGlobalVariables();
+
+  const suggestions: string [] = getSuggetionListFromOutputVariables(nodes, globalVariables);
+    
 
   const renderTextarea = () => (
     <Textarea
@@ -38,7 +49,23 @@ export default function TextAreaComponent({
       )}
       rows={1}
       placeholder="Type something..."
-      onChange={(event) => handleOnNewValue({ value: event.target.value })}
+      onChange={(event) => {
+        setInputValue(event.target.value);
+      }}
+      onBlur={(event) => {
+        /*
+        const pointer = event.target.selectionStart;
+        if(suggestions && suggestions.length > 0){
+          window.requestAnimationFrame(() => {
+            event.target.selectionStart = pointer;
+            event.target.selectionEnd = pointer;
+          });
+        }
+        */
+        handleOnNewValue({ value: event.target.value });
+      }}
+      isInput={isInput}
+      suggestions={suggestions}
     />
   );
 
@@ -49,6 +76,7 @@ export default function TextAreaComponent({
       setValue={(value) => handleOnNewValue({ value: value })}
       disabled={disabled}
       password={password}
+      suggestions={suggestions}
     >
       <div className={classNames("flex items-center")}>
         <Button unstyled disabled={disabled}>
@@ -127,7 +155,7 @@ export default function TextAreaComponent({
         {renderTextarea()}
         {renderPasswordToggle()}
       </div>
-      {renderExternalLinkButton()}
+      {(!isInput) && renderExternalLinkButton()}
     </div>
   );
 }

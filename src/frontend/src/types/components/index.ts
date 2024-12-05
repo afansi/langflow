@@ -619,6 +619,8 @@ export type textModalPropsType = {
   children: ReactNode;
   readonly?: boolean;
   password?: boolean;
+  suggestions?: string[];
+  suggestionMinChars?: number;
   changeVisibility?: () => void;
 };
 

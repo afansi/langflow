@@ -750,6 +750,8 @@ export const AUTHORIZED_DUPLICATE_REQUESTS = [
   "/auto_login",
 ];
 
+export const NODE_DISPLAY_ID_STR = "${NODE_DISPLAY_ID}";
+
 export const BROKEN_EDGES_WARNING =
   "Some connections were removed because they were invalid:";
 

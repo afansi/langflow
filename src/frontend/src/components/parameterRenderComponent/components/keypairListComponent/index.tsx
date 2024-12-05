@@ -9,6 +9,9 @@ import { cloneDeep } from "lodash";
 import IconComponent from "../../../genericIconComponent";
 import { Input } from "../../../ui/input";
 import { InputProps, KeyPairListComponentType } from "../../types";
+import useFlowStore from "../../../../stores/flowStore";
+import {getSuggetionListFromOutputVariables,} from "../../../../utils/reactflowUtils";
+import {useGetGlobalVariables,} from "@/controllers/API/queries/variables";
 
 export default function KeypairListComponent({
   value,
@@ -26,6 +29,12 @@ export default function KeypairListComponent({
       handleOnNewValue({ value: [{ "": "" }] }, { skipSnapshot: true });
     }
   }, [disabled]);
+
+
+  const nodes = useFlowStore((state) => state.nodes);
+  const { data: globalVariables } = useGetGlobalVariables();
+
+  const suggestions: string [] = getSuggetionListFromOutputVariables(nodes, globalVariables);
 
   const [duplicateKey, setDuplicateKey] = useState(false);
 
@@ -108,7 +117,17 @@ export default function KeypairListComponent({
               value={obj[key]}
               className={editNode ? "input-edit-node" : ""}
               placeholder="Type a value..."
-              onChange={(event) => handleChangeValue(event, index)}
+              onChange={(event) => {
+                if(suggestions && suggestions.length>0){
+                  const pointer = event.target.selectionStart;
+                  window.requestAnimationFrame(() => {
+                    event.target.selectionStart = pointer;
+                    event.target.selectionEnd = pointer;
+                  });
+                }
+                handleChangeValue(event, index);
+              }}
+              suggestions={suggestions}
             />
 
             {isList &&

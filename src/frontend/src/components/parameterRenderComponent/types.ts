@@ -78,6 +78,7 @@ export type DropDownComponentType = {
 export type TextAreaComponentType = {
   password?: boolean;
   updateVisibility?: () => void;
+  isInput?: boolean;
 };
 
 export type InputGlobalComponentType = {

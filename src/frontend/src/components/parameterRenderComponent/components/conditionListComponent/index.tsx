@@ -21,6 +21,8 @@ import { NodeDataType, sourceHandleType } from "@/types/flow";
 import { OutputFieldType } from "@/types/api";
 import { scapedJSONStringfy,scapeJSONParse } from "@/utils/reactflowUtils";
 import {Edge} from "reactflow";
+import {getSuggetionListFromOutputVariables,} from "../../../../utils/reactflowUtils";
+import {useGetGlobalVariables,} from "@/controllers/API/queries/variables";
 
 export default function ConditionListComponent({
   value,
@@ -61,6 +63,10 @@ export default function ConditionListComponent({
   const isGroupNode: boolean = nodeData?.type === "GroupNode";
 
   const operandWithNoValueSets = new Set<string>(OPERANDS_WITH_NO_VALUES);
+
+  const { data: globalVariables } = useGetGlobalVariables();
+
+  const suggestions: string [] = getSuggetionListFromOutputVariables(nodes, globalVariables);
 
   const handleOperandInputChange = (index, newOperand) => {
     const newInputList = _.cloneDeep(value);
@@ -230,8 +236,18 @@ export default function ConditionListComponent({
             value={singleValue[1]}
             className={editNode ? "input-edit-node" : ""}
             placeholder="Type something..."
-            onChange={(event) => handleValueInputChange(index, event.target.value)}
+            onChange={(event) => {
+              if(suggestions && suggestions.length>0){
+                const pointer = event.target.selectionStart;
+                window.requestAnimationFrame(() => {
+                  event.target.selectionStart = pointer;
+                  event.target.selectionEnd = pointer;
+                });
+              }
+              handleValueInputChange(index, event.target.value);
+            }}
             data-testid={`value_${id}_${index}`}
+            suggestions={suggestions}
           />
           {!isGroupNode && (<Button
             unstyled
@@ -250,72 +266,4 @@ export default function ConditionListComponent({
       ))}
     </div>
   );
-
-/* 
-
-  const getInputClassName = (isEditNode) => {
-    return `${isEditNode ? "input-edit-node" : ""} `.trim();
-  };
-
-  const getTestId = (prefix, index) =>
-    `${editNode ? "editNode" : ""}${prefix}${index}`;
-
-  return (
-    <div
-      className={`flex h-full flex-col gap-3 ${values?.length > 1 && editNode ? "mx-2 my-1" : ""}`}
-    >
-      {values?.map((obj, index) =>
-        Object.keys(obj).map((key, idx) => (
-          <div key={idx} className="flex w-full gap-2">
-            <Input
-              data-testid={getTestId("keypair", index)}
-              id={getTestId("keypair", index)}
-              type="text"
-              value={key.trim()}
-              className={getInputClassName(editNode, duplicateKey)}
-              placeholder="Type key..."
-              onChange={(event) => handleChangeKey(event, index)}
-            />
-
-            <Input
-              data-testid={getTestId("keypair", index + 100)}
-              id={getTestId("keypair", index + 100)}
-              type="text"
-              disabled={disabled}
-              value={obj[key]}
-              className={editNode ? "input-edit-node" : ""}
-              placeholder="Type a value..."
-              onChange={(event) => handleChangeValue(event, index)}
-            />
-
-            {isList &&
-              (index === values.length - 1 ? (
-                <button
-                  disabled={disabled}
-                  onClick={addNewKeyValuePair}
-                  id={getTestId("plusbtn", index)}
-                  data-testid={id}
-                >
-                  <IconComponent
-                    name="Plus"
-                    className="h-4 w-4 hover:text-accent-foreground"
-                  />
-                </button>
-              ) : (
-                <button
-                  onClick={() => removeKeyValuePair(index)}
-                  data-testid={getTestId("minusbtn", index)}
-                  id={getTestId("minusbtn", index)}
-                >
-                  <IconComponent
-                    name="X"
-                    className="h-4 w-4 hover:text-status-red"
-                  />
-                </button>
-              ))}
-          </div>
-        )),
-      )}
-    </div>
-  ); */
 }

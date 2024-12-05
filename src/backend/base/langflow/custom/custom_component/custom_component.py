@@ -57,7 +57,7 @@ class CustomComponent(BaseComponent):
     icon: str | None = None
     """The icon of the component. It should be an emoji. Defaults to None."""
     output_variables: dict | None = None
-    """The output variables of the component. Tt is of the form variable key:type. Defaults to None."""
+    """The output variables of the component. It is of the form variable key:type. Defaults to None."""
     is_input: bool | None = None
     """The input state of the component. Defaults to None.
     If True, the component must have a field named 'input_value'."""
