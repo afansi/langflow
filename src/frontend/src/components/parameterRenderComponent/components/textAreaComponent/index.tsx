@@ -25,7 +25,8 @@ export default function TextAreaComponent({
       handleOnNewValue({ value: "" }, { skipSnapshot: true });
     }
   }, [disabled]);
-  const [inputValue1, setInputValue] = useState(value);
+  const [inputValue, setInputValue] = useState(value);
+  value = inputValue;
 
   const nodes = useFlowStore((state) => state.nodes);
   const { data: globalVariables } = useGetGlobalVariables();
