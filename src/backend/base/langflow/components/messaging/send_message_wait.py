@@ -6,19 +6,19 @@ from langflow.template import Input, Output
 import random
 
 
-class SendMessageComponent(Component):
-    display_name = "SendMessage"
-    description = "Send a message."
+class SendMessageAndWaitResponseComponent(Component):
+    display_name = "SendMessageAndWaitResponse"
+    description = "Send Message and wait for a response."
     documentation: str = "http://docs.langflow.org/components/custom"
-    icon = "message-square-more"
-    name = "SendMessage"
+    icon = "ChatInput"
+    name = "SendMessageAndWaitResponse"
 
     inputs = [
         HandleInput(
             name="entry",
             display_name="Node Entry",
             #field_type="bool", # if uncommented, will put the input entry of the field on the form
-            input_types=["bool"],
+            input_types=["bool"]
         ),
         Input(
             name="body",
@@ -31,6 +31,15 @@ class SendMessageComponent(Component):
             #input_types=["Text"]
         ),
         Input(
+            name="timeout",
+            display_name="Timeout",
+            field_type="int",
+            required=True,
+            placeholder="Timeout in seconds",
+            value=3600,
+            info="The amount of time to wait for a response.",
+        ),
+        Input(
             name="mediaUrl",
             display_name="Media URL",
             #field_type="str",
@@ -38,7 +47,7 @@ class SendMessageComponent(Component):
             placeholder="The url of the media",
             multiline=False,
             info="the url of the media to send.",
-            #input_types=["Text"]
+            #input_types=["Text"],
         ),
         Input(
             name="templateId",
@@ -49,7 +58,7 @@ class SendMessageComponent(Component):
             multiline=False,
             advanced=True,
             info="The template content ID.",
-            #input_types=["Text"]
+            #input_types=["Text"],
         ),
         Input(
             name="templateParameters",
@@ -61,7 +70,7 @@ class SendMessageComponent(Component):
             advanced=True,
             info="template parameters.",
             is_list=True,
-            #input_types=["NestedDict"]
+            #input_types=["NestedDict"],
         ),
         Input(
             name="dest",
@@ -73,7 +82,7 @@ class SendMessageComponent(Component):
             info="the recipient of the message.",
             advanced=True,
             value="{{client.channelIdentity}}",
-            #input_types=["Text"]
+            #input_types=["Text"],
         ),
         Input(
             name="src",
@@ -85,7 +94,7 @@ class SendMessageComponent(Component):
             info="the sender of the message.",
             advanced=True,
             value="{{flow.ingress.entrypoint}}",
-            #input_types=["Text"]
+            #input_types=["Text"],
         ),
         Input(
             name="configuration",
@@ -97,7 +106,7 @@ class SendMessageComponent(Component):
             info="The Conversation configuration of this message.",
             advanced=True,
             value="{{starter.message.conversation.configurationId}}",
-            #input_types=["Text"]
+            #input_types=["Text"],
         ),
         Input(
             name="thread",
@@ -109,7 +118,7 @@ class SendMessageComponent(Component):
             info="The Conversation thread of this message.",
             advanced=True,
             value="{{starter.message.conversation.threadId}}",
-            #input_types=["Text"]
+            #input_types=["Text"],
         ),
         Input(
             name="metadata",
@@ -119,7 +128,7 @@ class SendMessageComponent(Component):
             placeholder="The message metadata",
             advanced=True,
             info="the message metadata.",
-            #input_types=["Text"]
+            #input_types=["Text"],
         ),
         Input(
             name="messagingOptions",
@@ -129,13 +138,14 @@ class SendMessageComponent(Component):
             placeholder="The messaging options",
             advanced=True,
             info="the messaging options.",
-            #input_types=["Text"]
+            #input_types=["Text"],
         ),
     ]
 
     outputs = [
-        Output(display_name="Success", name="Success", method="build_output_1", max_connections=1),
-        Output(display_name="DeliveryFailure", name="DeliveryFailure", method="build_output_2", max_connections=1),
+        Output(display_name="Response", name="Response", method="build_output_1", max_connections=1),
+        Output(display_name="Timeout", name="Timeout", method="build_output_2", max_connections=1),
+        Output(display_name="DeliveryFailure", name="DeliveryFailure", method="build_output_3", max_connections=1),
     ]
     
     output_variables = {
@@ -146,7 +156,18 @@ class SendMessageComponent(Component):
     	"{{states.${NODE_DISPLAY_ID}.sent.mediaUrl0}}" : "string", 
     	"{{states.${NODE_DISPLAY_ID}.sent.numMedia}}" : "int", 
     	"{{states.${NODE_DISPLAY_ID}.sent.status}}" : "string", 
-    	"{{states.${NODE_DISPLAY_ID}.sent.messageId}}" : "string", 
+    	"{{states.${NODE_DISPLAY_ID}.sent.messageId}}" : "string",     	
+    	
+    	"{{states.${NODE_DISPLAY_ID}.received.body}}" : "string", 
+    	"{{states.${NODE_DISPLAY_ID}.received.src}}" : "string", 
+    	"{{states.${NODE_DISPLAY_ID}.received.dest}}" : "string", 
+    	"{{states.${NODE_DISPLAY_ID}.received.mediaUrl}}" : "list", 
+    	"{{states.${NODE_DISPLAY_ID}.received.mediaUrl0}}" : "string", 
+    	"{{states.${NODE_DISPLAY_ID}.received.numMedia}}" : "int", 
+    	"{{states.${NODE_DISPLAY_ID}.received.richContent}}" : "dict", 
+    	"{{states.${NODE_DISPLAY_ID}.received.messageId}}" : "string", 
+    	
+    	
     }
     
     
@@ -158,13 +179,13 @@ class SendMessageComponent(Component):
 
     def build_output_1(self) -> bool:
         self.status = None
-        val1 = bool(random.getrandbits(1))
-        if(val1):
-            self.update_status(1)
-        else:
-            self.update_status(2)
-        return val1
+        val1 = random.randint(1, 3)
+        self.update_status(val1)
+        return val1 == 1
 
     def build_output_2(self) -> bool:
         return (self.status and isinstance(self.status, dict) and self.status.get('output_code') == 2)
+
+    def build_output_3(self) -> bool:
+        return (self.status and isinstance(self.status, dict) and self.status.get('output_code') == 3)
 

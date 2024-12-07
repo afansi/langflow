@@ -66,7 +66,10 @@ export default function ConditionListComponent({
 
   const { data: globalVariables } = useGetGlobalVariables();
 
-  const suggestions: string [] = getSuggetionListFromOutputVariables(nodes, globalVariables);
+  const suggestions: string [] = getSuggetionListFromOutputVariables(
+    nodes.filter((n) => n.id!==nodeId || (n.data.type!=="note" && n.data.type!=="Group")), 
+    globalVariables
+  );
 
   const handleOperandInputChange = (index, newOperand) => {
     const newInputList = _.cloneDeep(value);

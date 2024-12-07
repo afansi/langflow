@@ -52,6 +52,13 @@ export type LinkComponentType = {
 export type KeyPairListComponentType = {
   value: any;
   isList?: boolean;
+  nodeId?: string;
+};
+
+export type ParameterListComponentType = {
+  value: any;
+  isList?: boolean;
+  nodeId?: string;
 };
 
 export type ConditionListComponentType = {
@@ -63,11 +70,13 @@ export type ConditionListComponentType = {
 export type StrRenderComponentType = {
   templateData: Partial<InputFieldType>;
   name: string;
+  nodeId?: string;
 };
 
 export type InputListComponentType = {
   componentName?: string;
   id?: string;
+  nodeId?: string;
 };
 
 export type DropDownComponentType = {
@@ -79,6 +88,7 @@ export type TextAreaComponentType = {
   password?: boolean;
   updateVisibility?: () => void;
   isInput?: boolean;
+  nodeId?: string;
 };
 
 export type InputGlobalComponentType = {

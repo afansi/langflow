@@ -18,6 +18,7 @@ export default function TextAreaComponent({
   password,
   updateVisibility,
   isInput = false,
+  nodeId
 }: InputProps<string, TextAreaComponentType>): JSX.Element {
   // Clear text area
   useEffect(() => {
@@ -31,7 +32,10 @@ export default function TextAreaComponent({
   const nodes = useFlowStore((state) => state.nodes);
   const { data: globalVariables } = useGetGlobalVariables();
 
-  const suggestions: string [] = getSuggetionListFromOutputVariables(nodes, globalVariables);
+  const suggestions: string [] = getSuggetionListFromOutputVariables(
+    nodeId===undefined ? nodes: nodes.filter((n) => n.id!==nodeId || (n.data.type!=="note" && n.data.type!=="Group")), 
+    globalVariables
+  );
     
 
   const renderTextarea = () => (

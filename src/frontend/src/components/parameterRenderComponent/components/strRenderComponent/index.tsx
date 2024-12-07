@@ -7,6 +7,7 @@ import useFlowStore from "../../../../stores/flowStore";
 export function StrRenderComponent({
   templateData,
   name,
+  nodeId,
   ...baseInputProps
 }: InputProps<string, StrRenderComponentType>) {
   const { handleOnNewValue, id, disabled, editNode, value } = baseInputProps;
@@ -29,6 +30,7 @@ export function StrRenderComponent({
         }}
         id={`textarea_${id}`}
         isInput={false}
+        nodeId={nodeId}
       />
     ) : (
       hasOutputVariables ? (
@@ -45,6 +47,7 @@ export function StrRenderComponent({
           }}
           id={"input-" + name}
           isInput={true}
+          nodeId={nodeId}
         />
       ) : (
         <InputGlobalComponent

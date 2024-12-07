@@ -578,7 +578,7 @@ export function addVersionToDisplayIdDuplicates(nodeId:string, type: string, nod
   const nodesWithoutUpdatedNode = nodes.filter((f) => f.id !== nodeId);
 
   if(displayId===undefined){
-    displayId = (type!=="note" && type!=="GroupNode") ? type + "_1" : getNodeId(type==="GroupNode"?"Group":type).replace("-", "_");
+    displayId = (type!=="note" && type!=="GroupNode") ? (type==="Starter" ? "starter" : type + "_1") : getNodeId(type==="GroupNode"?"Group":type).replace("-", "_");
   }
 
   const existingNames = nodesWithoutUpdatedNode.map((node) => {
@@ -589,7 +589,7 @@ export function addVersionToDisplayIdDuplicates(nodeId:string, type: string, nod
   let count = 1;
 
   while (existingNames.includes(newName)) {
-    newName = (type!=="note" && type!=="GroupNode") ? `${type}_${count}`  : getNodeId(type==="GroupNode"?"Group":type).replace("-", "_");
+    newName = (type!=="note" && type!=="GroupNode") ? `${(type==="Starter" ? "starter" : type)}_${count}`  : getNodeId(type==="GroupNode"?"Group":type).replace("-", "_");
     count++;
   }
 

@@ -17,6 +17,7 @@ export default function InputListComponent({
   editNode = false,
   componentName,
   id,
+  nodeId,
 }: InputProps<string[], InputListComponentType>): JSX.Element {
   useEffect(() => {
     if (disabled && value.length > 0 && value[0] !== "") {
@@ -28,7 +29,10 @@ export default function InputListComponent({
   const nodes = useFlowStore((state) => state.nodes);
   const { data: globalVariables } = useGetGlobalVariables();
 
-  const suggestions: string [] = getSuggetionListFromOutputVariables(nodes, globalVariables);
+  const suggestions: string [] = getSuggetionListFromOutputVariables(
+    nodeId===undefined ? nodes: nodes.filter((n) => n.id!==nodeId || (n.data.type!=="note" && n.data.type!=="Group")), 
+    globalVariables
+  );
 
   // @TODO Recursive Character Text Splitter - the value might be in string format, whereas the InputListComponent specifically requires an array format. To ensure smooth operation and prevent potential errors, it's crucial that we handle the conversion from a string to an array with the string as its element.
   if (typeof value === "string") {
