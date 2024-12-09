@@ -31,110 +31,148 @@ export const STARTER_NODE_VALUE: FlowType = {
                   "type": "Starter",
                   "node":
                   {
-                      "template":
-                      {
-                          "_type": "Component",
-                          "code":
-                          {
-                              "type": "code",
-                              "required": true,
-                              "placeholder": "",
-                              "list": false,
-                              "show": true,
-                              "multiline": true,
-                              "value": "# from langflow.field_typing import Data\nfrom langflow.custom import Component\nfrom langflow.io import MessageTextInput, Output, HandleInput\nfrom langflow.schema import Data\nimport random\n\n\nclass StarterComponent(Component):\n    display_name = \"Starter\"\n    description = \"Starter component that trigger the flow execution.\"\n    documentation: str = \"http://docs.langflow.org/components/custom\"\n    icon = \"custom_components\"\n    name = \"Starter\"\n\n    inputs = [\n        # MessageTextInput(name=\"input_value\", display_name=\"Input Value\", value=\"Hello, World!\"),\n    ]\n\n    outputs = [\n        Output(display_name=\"Incoming Message\", name=\"incoming_message_event\", method=\"build_output_1\", max_connections=1),\n        Output(display_name=\"Incoming Conversation\", name=\"incoming_conversation_event\", method=\"build_output_2\", max_connections=1),\n        Output(display_name=\"REST API\", name=\"rest_api_event\", method=\"build_output_3\", max_connections=1),\n        Output(display_name=\"SubModule\", name=\"sub_module_envent\", method=\"build_output_4\", max_connections=1),\n    ]\n    \n    \n    def update_status(self, code: int) -> dict:\n        if(self.status is None or (not isinstance(self.status, dict))):\n            self.status = {}\n        self.status['output_code'] = code\n        return self.status\n\n    def build_output_1(self) -> bool:\n        self.status = None\n        val1 = bool(random.getrandbits(1))\n        if(val1):\n            self.update_status(1)\n        elif bool(random.getrandbits(1)):\n            self.update_status(2)\n        elif bool(random.getrandbits(1)):\n            self.update_status(3)\n        elif bool(random.getrandbits(1)):\n            self.update_status(4)\n        return val1\n\n    def build_output_2(self) -> bool:\n        return (self.status and isinstance(self.status, dict) and self.status.get('output_code') == 2)\n\n    def build_output_3(self) -> bool:\n        return (self.status and isinstance(self.status, dict) and self.status.get('output_code') == 3)\n\n    def build_output_4(self) -> bool:\n        return (self.status and isinstance(self.status, dict) and self.status.get('output_code') == 4)\n\n",
-                              "fileTypes":
-                              [],
-                              "file_path": "",
-                              "password": false,
-                              "name": "code",
-                              "advanced": true,
-                              "dynamic": true,
-                              "info": "",
-                              "load_from_db": false,
-                              "title_case": false,
-                              "can_accept_multiple_edges": false
-                          }
-                      },
-                      "description": "Starter component that trigger the flow execution.",
-                      "icon": "custom_components",
-                      "base_classes":
-                      [
-                          "bool"
-                      ],
-                      "display_name": "Starter",
-                      "documentation": "http://docs.langflow.org/components/custom",
-                      "custom_fields":
-                      {},
-                      "output_types":
-                      [],
-                      "pinned": false,
-                      "conditional_paths":
-                      [],
-                      "frozen": false,
-                      "outputs":
-                      [
-                          {
-                              "types":
-                              [
-                                  "bool"
-                              ],
-                              "selected": "bool",
-                              "name": "incoming_message_event",
-                              "display_name": "Incoming Message",
-                              "method": "build_output_1",
-                              "value": "__UNDEFINED__",
-                              "cache": true,
-                              "max_connections": 1
-                          },
-                          {
-                              "types":
-                              [
-                                  "bool"
-                              ],
-                              "selected": "bool",
-                              "name": "incoming_conversation_event",
-                              "display_name": "Incoming Conversation",
-                              "method": "build_output_2",
-                              "value": "__UNDEFINED__",
-                              "cache": true,
-                              "max_connections": 1
-                          },
-                          {
-                              "types":
-                              [
-                                  "bool"
-                              ],
-                              "selected": "bool",
-                              "name": "rest_api_event",
-                              "display_name": "REST API",
-                              "method": "build_output_3",
-                              "value": "__UNDEFINED__",
-                              "cache": true,
-                              "max_connections": 1
-                          },
-                          {
-                              "types":
-                              [
-                                  "bool"
-                              ],
-                              "selected": "bool",
-                              "name": "sub_module_envent",
-                              "display_name": "SubModule",
-                              "method": "build_output_4",
-                              "value": "__UNDEFINED__",
-                              "cache": true,
-                              "max_connections": 1
-                          }
-                      ],
-                      "field_order":
-                      [],
-                      "beta": false,
-                      "edited": false,
-                      "metadata":
-                      {}
+                    "template":
+                    {
+                        "_type": "Component",
+                        "code":
+                        {
+                            "type": "code",
+                            "required": true,
+                            "placeholder": "",
+                            "list": false,
+                            "show": true,
+                            "multiline": true,
+                            "value": "# from langflow.field_typing import Data\nfrom langflow.custom import Component\nfrom langflow.io import MessageTextInput, Output, HandleInput\nfrom langflow.schema import Data\nimport random\n\n\nclass StarterComponent(Component):\n    display_name = \"Starter\"\n    description = \"Starter component that trigger the flow execution.\"\n    documentation: str = \"http://docs.langflow.org/components/custom\"\n    icon = \"chevrons-down\"\n    name = \"Starter\"\n\n    inputs = [\n        # MessageTextInput(name=\"input_value\", display_name=\"Input Value\", value=\"Hello, World!\"),\n    ]\n\n    outputs = [\n        Output(display_name=\"Incoming Message\", name=\"IncomingMessage\", method=\"build_output_1\", max_connections=1),\n        Output(display_name=\"Incoming Conversation\", name=\"IncomingConversationThread\", method=\"build_output_2\", max_connections=1),\n        Output(display_name=\"REST API\", name=\"IncomingAPIRequest\", method=\"build_output_3\", max_connections=1),\n        Output(display_name=\"Subflow\", name=\"SubflowRequest\", method=\"build_output_4\", max_connections=1),\n    ]\n\n    output_variables = {\n    \t# IncomingAPIRequest, SubflowRequest, IncomingMessage, IncomingConversationThread\n    \t\"{{starter.event}}\" : \"string\", \n\n\t\"{{starter.conversation.appletId}}\" : \"string\",\n\t\"{{starter.conversation.threadId}}\" : \"string\",\n\t\"{{starter.conversation.configurationId}}\" : \"string\",\n\t\"{{starter.conversation.body}}\" : \"string\",\n\t\"{{starter.conversation.mediaUrl}}\" : \"list\",\n\t\"{{starter.conversation.mediaUrl0}}\" : \"string\",\n\t# \"{{starter.conversation.mediaUrl1}}\" : \"string\",\n\t# \"{{starter.conversation.mediaUrl2}}\" : \"string\",\n\t# \"{{starter.conversation.mediaUrl3}}\" : \"string\",\n\t# \"{{starter.conversation.mediaUrl4}}\" : \"string\",\n\t# \"{{starter.conversation.mediaUrl5}}\" : \"string\",\n\t# \"{{starter.conversation.mediaUrl6}}\" : \"string\",\n\t# \"{{starter.conversation.mediaUrl7}}\" : \"string\",\n\t# \"{{starter.conversation.mediaUrl8}}\" : \"string\",\n\t# \"{{starter.conversation.mediaUrl9}}\" : \"string\",\n\t\"{{starter.conversation.numMedia}}\" : \"int\",\n\t\"{{starter.conversation.richContent}}\" : \"dict\",\n\t\"{{starter.conversation.ingressId}}\" : \"string\",\n\t\"{{starter.conversation.src}}\" : \"string\",\n\t\"{{starter.conversation.dateCreated}}\" : \"datetime\",\n\n\t\"{{starter.message.appletId}}\" : \"string\",\n\t\"{{starter.message.messageId}}\" : \"string\",\n\t\"{{starter.message.conversation.threadId}}\" : \"string\",\n\t\"{{starter.message.conversation.configurationId}}\" : \"string\",\n\t\"{{starter.message.body}}\" : \"string\",\n\t\"{{starter.message.mediaUrl}}\" : \"list\",\n\t\"{{starter.message.mediaUrl0}}\" : \"string\",\n\t# \"{{starter.message.mediaUrl1}}\" : \"string\",\n\t# \"{{starter.message.mediaUrl2}}\" : \"string\",\n\t# \"{{starter.message.mediaUrl3}}\" : \"string\",\n\t# \"{{starter.message.mediaUrl4}}\" : \"string\",\n\t# \"{{starter.message.mediaUrl5}}\" : \"string\",\n\t# \"{{starter.message.mediaUrl6}}\" : \"string\",\n\t# \"{{starter.message.mediaUrl7}}\" : \"string\",\n\t# \"{{starter.message.mediaUrl8}}\" : \"string\",\n\t# \"{{starter.message.mediaUrl9}}\" : \"string\",\n\t\"{{starter.message.numMedia}}\" : \"int\",\n\t\"{{starter.message.richContent}}\" : \"dict\",\n\t\"{{starter.message.ingress.channelId}}\" : \"string\",\n\t\"{{starter.message.src}}\" : \"string\",\n\t\"{{starter.message.srcCountry}}\" : \"string\",\n\t\"{{starter.message.dest}}\" : \"string\",\n\t\"{{starter.message.destCountry}}\" : \"string\",\n\t\"{{starter.message.dateCreated}}\" : \"datetime\",\n\n\t\"{{flow.data}}\" : \"dict\",\n\t\"{{flow.context}}\" : \"dict\",\n\t\"{{flow.ingress.entrypoint}}\" : \"string\",\n\n\t\"{{client.channelIdentity}}\" : \"string\",\n    }\n    \n    \n    def update_status(self, code: int) -> dict:\n        if(self.status is None or (not isinstance(self.status, dict))):\n            self.status = {}\n        self.status['output_code'] = code\n        return self.status\n\n    def build_output_1(self) -> bool:\n        self.status = None\n        val1 = bool(random.getrandbits(1))\n        if(val1):\n            self.update_status(1)\n        elif bool(random.getrandbits(1)):\n            self.update_status(2)\n        elif bool(random.getrandbits(1)):\n            self.update_status(3)\n        elif bool(random.getrandbits(1)):\n            self.update_status(4)\n        return val1\n\n    def build_output_2(self) -> bool:\n        return (self.status and isinstance(self.status, dict) and self.status.get('output_code') == 2)\n\n    def build_output_3(self) -> bool:\n        return (self.status and isinstance(self.status, dict) and self.status.get('output_code') == 3)\n\n    def build_output_4(self) -> bool:\n        return (self.status and isinstance(self.status, dict) and self.status.get('output_code') == 4)\n\n",
+                            "fileTypes":
+                            [],
+                            "file_path": "",
+                            "password": false,
+                            "name": "code",
+                            "advanced": true,
+                            "dynamic": true,
+                            "info": "",
+                            "load_from_db": false,
+                            "title_case": false,
+                            "can_accept_multiple_edges": false
+                        }
+                    },
+                    "description": "Starter component that trigger the flow execution.",
+                    "icon": "chevrons-down",
+                    "base_classes":
+                    [
+                        "bool"
+                    ],
+                    "display_name": "Starter",
+                    "documentation": "http://docs.langflow.org/components/custom",
+                    "custom_fields":
+                    {},
+                    "output_types":
+                    [],
+                    "pinned": false,
+                    "conditional_paths":
+                    [],
+                    "frozen": false,
+                    "outputs":
+                    [
+                        {
+                            "types":
+                            [
+                                "bool"
+                            ],
+                            "selected": "bool",
+                            "name": "IncomingMessage",
+                            "display_name": "Incoming Message",
+                            "method": "build_output_1",
+                            "value": "__UNDEFINED__",
+                            "cache": true,
+                            "max_connections": 1
+                        },
+                        {
+                            "types":
+                            [
+                                "bool"
+                            ],
+                            "selected": "bool",
+                            "name": "IncomingConversationThread",
+                            "display_name": "Incoming Conversation",
+                            "method": "build_output_2",
+                            "value": "__UNDEFINED__",
+                            "cache": true,
+                            "max_connections": 1
+                        },
+                        {
+                            "types":
+                            [
+                                "bool"
+                            ],
+                            "selected": "bool",
+                            "name": "IncomingAPIRequest",
+                            "display_name": "REST API",
+                            "method": "build_output_3",
+                            "value": "__UNDEFINED__",
+                            "cache": true,
+                            "max_connections": 1
+                        },
+                        {
+                            "types":
+                            [
+                                "bool"
+                            ],
+                            "selected": "bool",
+                            "name": "SubflowRequest",
+                            "display_name": "Subflow",
+                            "method": "build_output_4",
+                            "value": "__UNDEFINED__",
+                            "cache": true,
+                            "max_connections": 1
+                        }
+                    ],
+                    "field_order":
+                    [],
+                    "beta": false,
+                    "edited": false,
+                    "metadata":
+                    {},
+                    "output_variables":
+                    {
+                        "{{starter.event}}": "string",
+                        "{{starter.conversation.appletId}}": "string",
+                        "{{starter.conversation.threadId}}": "string",
+                        "{{starter.conversation.configurationId}}": "string",
+                        "{{starter.conversation.body}}": "string",
+                        "{{starter.conversation.mediaUrl}}": "list",
+                        "{{starter.conversation.mediaUrl0}}": "string",
+                        "{{starter.conversation.numMedia}}": "int",
+                        "{{starter.conversation.richContent}}": "dict",
+                        "{{starter.conversation.ingressId}}": "string",
+                        "{{starter.conversation.src}}": "string",
+                        "{{starter.conversation.dateCreated}}": "datetime",
+                        "{{starter.message.appletId}}": "string",
+                        "{{starter.message.messageId}}": "string",
+                        "{{starter.message.conversation.threadId}}": "string",
+                        "{{starter.message.conversation.configurationId}}": "string",
+                        "{{starter.message.body}}": "string",
+                        "{{starter.message.mediaUrl}}": "list",
+                        "{{starter.message.mediaUrl0}}": "string",
+                        "{{starter.message.numMedia}}": "int",
+                        "{{starter.message.richContent}}": "dict",
+                        "{{starter.message.ingress.channelId}}": "string",
+                        "{{starter.message.src}}": "string",
+                        "{{starter.message.srcCountry}}": "string",
+                        "{{starter.message.dest}}": "string",
+                        "{{starter.message.destCountry}}": "string",
+                        "{{starter.message.dateCreated}}": "datetime",
+                        "{{flow.data}}": "dict",
+                        "{{flow.context}}": "dict",
+                        "{{flow.ingress.entrypoint}}": "string",
+                        "{{client.channelIdentity}}": "string"
+                    },
+                    "display_id": "starter",
+                    "official": false
                   },
                   "id": "Starter-zzh2C"
+                  "description": "Starter component that trigger the flow execution.",
+                  "display_name": "Starter"
               },
               "selected": true,
               "width": 384,
