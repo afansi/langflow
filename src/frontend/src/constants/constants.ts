@@ -653,6 +653,7 @@ export const LANGFLOW_SUPPORTED_TYPES = new Set([
   "link",
   "slider",
   "conditionList",
+  "parameterList",
 ]);
 
 export const priorityFields = new Set(["code", "template"]);
@@ -749,6 +750,8 @@ export const AUTHORIZED_DUPLICATE_REQUESTS = [
   "/login",
   "/auto_login",
 ];
+
+export const NODE_DISPLAY_ID_STR = "${NODE_DISPLAY_ID}";
 
 export const BROKEN_EDGES_WARNING =
   "Some connections were removed because they were invalid:";

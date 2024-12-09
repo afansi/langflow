@@ -357,7 +357,7 @@ const useFlowStore = create<FlowStoreType>((set, get) => ({
       // Generate a unique node ID
       let newId = getNodeId(node.data.type);
       idsMap[node.id] = newId;
-
+     
       // Create a new node object
       const newNode: NodeType = {
         id: newId,

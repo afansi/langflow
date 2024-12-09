@@ -61,6 +61,7 @@ import {
   updateIds,
   validateSelection,
   addVersionToDisplayIdDuplicates,
+  generateOutPutVariablesFromNodeDisplayId,
 } from "../../../../utils/reactflowUtils";
 import ConnectionLineComponent from "../ConnectionLineComponent";
 import SelectionMenu from "../SelectionMenuComponent";
@@ -120,7 +121,7 @@ export default function Page({ view }: { view?: boolean }): JSX.Element {
 
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [isHighlightingCursor, setIsHighlightingCursor] = useState(false);
-
+  
   //force display_id
   nodes.forEach((n) => {
     if(n.data.node){
@@ -219,7 +220,10 @@ export default function Page({ view }: { view?: boolean }): JSX.Element {
       newFlow?.data?.nodes.forEach((node) => {
         groupVariables = {
           ...groupVariables,
-          ...(node?.data?.node?.output_variables ?? {})
+          ...(generateOutPutVariablesFromNodeDisplayId(
+                node?.data?.node?.output_variables ?? {}, 
+                node?.data?.node?.display_id ?? "")
+          )
         };
       });
 
@@ -763,3 +767,5 @@ export default function Page({ view }: { view?: boolean }): JSX.Element {
     </div>
   );
 }
+
+

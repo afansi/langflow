@@ -19,6 +19,8 @@ export default function ComponentTextModal({
   readonly = false,
   password,
   changeVisibility,
+  suggestions,
+  suggestionMinChars,
 }: textModalPropsType): JSX.Element {
   const [modalOpen, setModalOpen] = useState(false);
   const [inputValue, setInputValue] = useState(value);
@@ -77,12 +79,14 @@ export default function ComponentTextModal({
               setInputValue(event.target.value);
             }}
             placeholder={EDIT_TEXT_PLACEHOLDER}
-            onKeyDown={(e) => {
-              handleKeyDown(e, value, "");
-            }}
+            //onKeyDown={(e) => {
+            //  handleKeyDown(e, value, "");
+            //}}
             readOnly={readonly}
             id={"text-area-modal"}
             data-testid={"text-area-modal"}
+            suggestions={suggestions}
+            suggestionMinChars={suggestionMinChars}
           />
         </div>
       </BaseModal.Content>

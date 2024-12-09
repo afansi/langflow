@@ -371,6 +371,7 @@ export const nodeNames: { [char: string]: string } = {
   custom_components: "Custom",
   link_extractors: "Link Extractors",
   unknown: "Other",
+
   flow_control: "Flow Control",
   messaging: "Messaging",
   tools_code: "Tools & Coding",
@@ -674,6 +675,7 @@ export const nodeIconsLucide: iconsType = {
   TavilyIcon,
   DuckDuckGo: DuckDuckGoIcon,
   OpenSearch,
+  
   flow_control: Scissors,
   messaging: Bot,
   tools_code: Hammer,

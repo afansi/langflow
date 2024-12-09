@@ -72,4 +72,5 @@ ATTR_FUNC_MAPPING: dict[str, Callable] = {
     "outputs": getattr_return_list_of_object,
     "inputs": getattr_return_list_of_object,
     "metadata": getattr_return_dict,
+    "output_variables": getattr_return_dict,
 }

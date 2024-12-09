@@ -8,12 +8,13 @@ import {
 import { cloneDeep } from "lodash";
 import IconComponent from "../../../genericIconComponent";
 import { Input } from "../../../ui/input";
-import { InputProps, KeyPairListComponentType } from "../../types";
+import { Switch } from "../../../ui/switch";
+import { InputProps, ParameterListComponentType } from "../../types";
 import useFlowStore from "../../../../stores/flowStore";
 import {getSuggetionListFromOutputVariables,} from "../../../../utils/reactflowUtils";
 import {useGetGlobalVariables,} from "@/controllers/API/queries/variables";
 
-export default function KeypairListComponent({
+export default function ParameterListComponent({
   value,
   handleOnNewValue,
   disabled,
@@ -23,11 +24,11 @@ export default function KeypairListComponent({
   nodeId,
 }: InputProps<
   object[] | object | string,
-  KeyPairListComponentType
+  ParameterListComponentType
 >): JSX.Element {
   useEffect(() => {
     if (disabled && value.length > 0 && value[0] !== "") {
-      handleOnNewValue({ value: [{ "": "" }] }, { skipSnapshot: true });
+      handleOnNewValue({ value: [{ "": ["", false] }] }, { skipSnapshot: true });
     }
   }, [disabled]);
 
@@ -44,7 +45,7 @@ export default function KeypairListComponent({
 
   const values =
     Object.keys(value || {})?.length === 0 || !value
-      ? [{ "": "" }]
+      ? [{ "": ["", false] }]
       : convertObjToArray(value, "dict");
 
   Array.isArray(value) ? value : [value];
@@ -69,7 +70,17 @@ export default function KeypairListComponent({
 
   const handleChangeValue = (event, idx) => {
     const key = Object.keys(values[idx])[0];
-    const updatedObj = { [key]: event.target.value };
+    const updatedObj = { [key]: [event.target.value, values[idx][key][1]] };
+
+    const newValue = cloneDeep(values);
+    newValue[idx] = updatedObj;
+
+    handleNewValue(newValue);
+  };
+
+  const handleChangeValue2 = (isEnabled, idx) => {
+    const key = Object.keys(values[idx])[0];
+    const updatedObj = { [key]: [values[idx][key][0], isEnabled] };
 
     const newValue = cloneDeep(values);
     newValue[idx] = updatedObj;
@@ -79,7 +90,7 @@ export default function KeypairListComponent({
 
   const addNewKeyValuePair = () => {
     const newValues = cloneDeep(values);
-    newValues.push({ "": "" });
+    newValues.push({ "": ["", false] });
     handleOnNewValue({ value: newValues });
   };
 
@@ -96,6 +107,15 @@ export default function KeypairListComponent({
   const getTestId = (prefix, index) =>
     `${editNode ? "editNode" : ""}${prefix}${index}`;
 
+  let scaleX, scaleY;
+  if (editNode) {
+    scaleX = 0.6;
+    scaleY = 0.6;
+  } else {
+    scaleX = 1;
+    scaleY = 1;
+  }
+
   return (
     <div
       className={`flex h-full flex-col gap-3 ${values?.length > 1 && editNode ? "mx-2 my-1" : ""}`}
@@ -104,8 +124,8 @@ export default function KeypairListComponent({
         Object.keys(obj).map((key, idx) => (
           <div key={idx} className="flex w-full gap-2">
             <Input
-              data-testid={getTestId("keypair", index)}
-              id={getTestId("keypair", index)}
+              data-testid={getTestId("paramList", index)}
+              id={getTestId("paramList", index)}
               type="text"
               value={key.trim()}
               className={getInputClassName(editNode, duplicateKey)}
@@ -114,11 +134,11 @@ export default function KeypairListComponent({
             />
 
             <Input
-              data-testid={getTestId("keypair", index + 100)}
-              id={getTestId("keypair", index + 100)}
+              data-testid={getTestId("paramList", index + 100)}
+              id={getTestId("paramList", index + 100)}
               type="text"
               disabled={disabled}
-              value={obj[key]}
+              value={obj[key][0]}
               className={editNode ? "input-edit-node" : ""}
               placeholder="Type a value..."
               onChange={(event) => {
@@ -133,6 +153,18 @@ export default function KeypairListComponent({
               }}
               suggestions={suggestions}
             />
+
+            <Switch
+              id={getTestId("paramList", index + 200)}
+              data-testid={getTestId("paramList", index + 200)}
+              style={{
+                transform: `scaleX(${scaleX}) scaleY(${scaleY})`,
+              }}
+              disabled={disabled}
+              className=""
+              checked={obj[key][1]}
+              onCheckedChange={(isEnabled: boolean) => handleChangeValue2(isEnabled, index)}
+            ></Switch>
 
             {isList &&
               (index === values.length - 1 ? (

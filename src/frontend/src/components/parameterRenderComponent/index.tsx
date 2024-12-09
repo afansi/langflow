@@ -13,6 +13,7 @@ import InputFileComponent from "./components/inputFileComponent";
 import InputListComponent from "./components/inputListComponent";
 import IntComponent from "./components/intComponent";
 import KeypairListComponent from "./components/keypairListComponent";
+import ParameterListComponent from "./components/parameterListComponent";
 import ConditionListComponent from "./components/conditionListComponent";
 import LinkComponent from "./components/linkComponent";
 import MultiselectComponent from "./components/multiselectComponent";
@@ -69,6 +70,7 @@ export function ParameterRenderComponent({
               {...baseInputProps}
               componentName={name}
               id={`inputlist_${id}`}
+              nodeId={nodeId}
             />
           );
         }
@@ -93,6 +95,7 @@ export function ParameterRenderComponent({
           templateData={templateData}
           name={name}
           editNode={editNode}
+          nodeId={nodeId}
         />
       );
     }
@@ -105,6 +108,25 @@ export function ParameterRenderComponent({
             {...baseInputProps}
             isList={templateData.list ?? false}
             id={`keypair_${id}`}
+            nodeId={nodeId}
+          />
+        );
+      case "parameterList":
+        return (
+          <ParameterListComponent
+            {...baseInputProps}
+            isList={templateData.list ?? true}
+            id={`parameterList_${id}`}
+            nodeId={nodeId}
+          />
+        );
+      case "conditionList":
+        return (
+          <ConditionListComponent
+            {...baseInputProps}
+            isList={templateData.list ?? true}
+            id={`conditionalEdge_${id}`}
+            nodeId={nodeId}
           />
         );
       case "conditionList":

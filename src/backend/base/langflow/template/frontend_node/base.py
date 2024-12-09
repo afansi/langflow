@@ -55,6 +55,8 @@ class FrontendNode(BaseModel):
     """Whether the frontend node has been edited."""
     metadata: dict = {}
     """Metadata for the component node."""
+    output_variables: dict | None = None
+    """The output variables of the component node. It is of the form variable key:type. Defaults to None."""
 
     def set_documentation(self, documentation: str) -> None:
         """Sets the documentation of the frontend node."""

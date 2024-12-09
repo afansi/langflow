@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import _ from "lodash";
 import { classNames, cn } from "../../../../utils/utils";
@@ -6,6 +6,9 @@ import IconComponent from "../../../genericIconComponent";
 import { Button } from "../../../ui/button";
 import { Input } from "../../../ui/input";
 import { InputListComponentType, InputProps } from "../../types";
+import useFlowStore from "../../../../stores/flowStore";
+import {getSuggetionListFromOutputVariables,} from "../../../../utils/reactflowUtils";
+import {useGetGlobalVariables,} from "@/controllers/API/queries/variables";
 
 export default function InputListComponent({
   value = [""],
@@ -14,12 +17,22 @@ export default function InputListComponent({
   editNode = false,
   componentName,
   id,
+  nodeId,
 }: InputProps<string[], InputListComponentType>): JSX.Element {
   useEffect(() => {
     if (disabled && value.length > 0 && value[0] !== "") {
       handleOnNewValue({ value: [""] }, { skipSnapshot: true });
     }
   }, [disabled]);
+
+
+  const nodes = useFlowStore((state) => state.nodes);
+  const { data: globalVariables } = useGetGlobalVariables();
+
+  const suggestions: string [] = getSuggetionListFromOutputVariables(
+    nodeId===undefined ? nodes: nodes.filter((n) => n.id!==nodeId || (n.data.type!=="note" && n.data.type!=="Group")), 
+    globalVariables
+  );
 
   // @TODO Recursive Character Text Splitter - the value might be in string format, whereas the InputListComponent specifically requires an array format. To ensure smooth operation and prevent potential errors, it's crucial that we handle the conversion from a string to an array with the string as its element.
   if (typeof value === "string") {
@@ -73,8 +86,18 @@ export default function InputListComponent({
             value={singleValue}
             className={editNode ? "input-edit-node" : ""}
             placeholder="Type something..."
-            onChange={(event) => handleInputChange(index, event.target.value)}
+            onChange={(event) => {
+              if(suggestions && suggestions.length>0){
+                const pointer = event.target.selectionStart;
+                window.requestAnimationFrame(() => {
+                  event.target.selectionStart = pointer;
+                  event.target.selectionEnd = pointer;
+                });
+              }
+              handleInputChange(index, event.target.value);
+            }}
             data-testid={`${id}_${index}`}
+            suggestions={suggestions}
           />
           <Button
             unstyled

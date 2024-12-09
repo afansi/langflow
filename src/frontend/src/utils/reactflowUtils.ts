@@ -20,6 +20,7 @@ import {
   OUTPUT_TYPES,
   SUCCESS_BUILD,
   specialCharsRegex,
+  NODE_DISPLAY_ID_STR,
 } from "../constants/constants";
 import { DESCRIPTIONS } from "../flow_constants";
 import {
@@ -47,6 +48,7 @@ import {
 } from "../types/utils/reactflowUtils";
 import { getLayoutedNodes } from "./layoutUtils";
 import { createRandomKey, toTitleCase } from "./utils";
+import { GlobalVariable } from "@/types/global_variables";
 const uid = new ShortUniqueId();
 
 export function checkChatInput(nodes: Node[]) {
@@ -577,7 +579,7 @@ export function addVersionToDisplayIdDuplicates(nodeId:string, type: string, nod
   const nodesWithoutUpdatedNode = nodes.filter((f) => f.id !== nodeId);
 
   if(displayId===undefined){
-    displayId = (type!=="note" && type!=="GroupNode") ? type + "_1" : getNodeId(type==="GroupNode"?"Group":type).replace("-", "_");
+    displayId = (type!=="note" && type!=="GroupNode") ? (type==="Starter" ? "starter" : type + "_1") : getNodeId(type==="GroupNode"?"Group":type).replace("-", "_");
   }
 
   const existingNames = nodesWithoutUpdatedNode.map((node) => {
@@ -588,7 +590,7 @@ export function addVersionToDisplayIdDuplicates(nodeId:string, type: string, nod
   let count = 1;
 
   while (existingNames.includes(newName)) {
-    newName = (type!=="note" && type!=="GroupNode") ? `${type}_${count}`  : getNodeId(type==="GroupNode"?"Group":type).replace("-", "_");
+    newName = (type!=="note" && type!=="GroupNode") ? `${(type==="Starter" ? "starter" : type)}_${count}`  : getNodeId(type==="GroupNode"?"Group":type).replace("-", "_");
     count++;
   }
 
@@ -1251,6 +1253,45 @@ export function generateNodeTemplate(Flow: FlowType) {
   return template;
 }
 
+export function generateOutPutVariablesFromNodeDisplayId(
+  output_variables: any,
+  node_display_id: string
+): any {
+  const result = {}
+  if(output_variables){
+    if(node_display_id===undefined || node_display_id===null || node_display_id.length==0){
+      node_display_id = NODE_DISPLAY_ID_STR;
+    }
+    Object.keys(output_variables).forEach((key:string)=>{
+      result[key.replace(NODE_DISPLAY_ID_STR, node_display_id)] = output_variables[key];
+    });
+  }
+  return result;
+}
+
+export function getSuggetionListFromOutputVariables(
+  nodes: Node[],
+  globalVariables?:GlobalVariable[]
+): string[] {
+  const suggestions: string [] = []
+  
+  nodes.forEach((n) => {
+    if(n.data?.node?.output_variables){
+      Object.keys(
+        generateOutPutVariablesFromNodeDisplayId(n.data.node.output_variables, n.data.node.display_id)
+      ).forEach((key:string)=>{
+        suggestions.push(key);
+      });
+    }
+  });
+  if (globalVariables){
+    globalVariables.forEach((v) => {
+      suggestions.push(v.name);
+    });
+  }
+  return suggestions;
+}
+
 export function generateNodeFromFlow(
   flow: FlowType,
   groupVariables: any,
@@ -1900,3 +1941,4 @@ export function someFlowTemplateFields(
     });
   });
 }
+
