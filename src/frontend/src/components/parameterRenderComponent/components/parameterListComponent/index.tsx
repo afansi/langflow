@@ -9,6 +9,10 @@ import { cloneDeep } from "lodash";
 import IconComponent from "../../../genericIconComponent";
 import { Input } from "../../../ui/input";
 import { Switch } from "../../../ui/switch";
+import { Textarea } from "../../../ui/textarea";
+import { Button } from "../../../ui/button";
+import { classNames } from "@/utils/utils";
+import ComponentTextModal from "@/modals/textAreaModal";
 import { InputProps, ParameterListComponentType } from "../../types";
 import useFlowStore from "../../../../stores/flowStore";
 import {getSuggetionListFromOutputVariables,} from "../../../../utils/reactflowUtils";
@@ -50,8 +54,26 @@ export default function ParameterListComponent({
 
   Array.isArray(value) ? value : [value];
 
+
+  const getScrollTop = (text: string, rows: number, cols: number, start: number, height: number) => {    
+    start = Math.min(text?.length ?? 0, start);  
+    const lines = (text?.substring(0, start).split(/\r?\n/g) || []);
+    let numLines = lines.length == 0 ? 1: lines.length;
+
+    lines.forEach((l)=>{
+      const len = l?.length ?? 0;
+      numLines = numLines + ((len - (len % cols))/cols);
+    });
+
+    var lineHeight = height / rows;
+
+    return (numLines - 1) * lineHeight;
+
+  }
+
+  
   const handleNewValue = (newValue: any) => {
-    const valueToNumbers = convertValuesToNumbers(newValue);
+    const valueToNumbers = cloneDeep(newValue);
     setDuplicateKey(hasDuplicateKeys(valueToNumbers));
     if (isList) {
       handleOnNewValue({ value: valueToNumbers });
@@ -68,14 +90,19 @@ export default function ParameterListComponent({
     handleNewValue(newValue);
   };
 
-  const handleChangeValue = (event, idx) => {
+  const handleChangeValueBase = (aValue, idx) => {
     const key = Object.keys(values[idx])[0];
-    const updatedObj = { [key]: [event.target.value, values[idx][key][1]] };
+    const updatedObj = { [key]: [aValue, values[idx][key][1]] };
 
     const newValue = cloneDeep(values);
     newValue[idx] = updatedObj;
 
     handleNewValue(newValue);
+  };
+
+  const handleChangeValue = (event, idx) => {
+    const aValue = event.target.value;
+    handleChangeValueBase(aValue, idx);
   };
 
   const handleChangeValue2 = (isEnabled, idx) => {
@@ -112,8 +139,8 @@ export default function ParameterListComponent({
     scaleX = 0.6;
     scaleY = 0.6;
   } else {
-    scaleX = 1;
-    scaleY = 1;
+    scaleX = 0.6;
+    scaleY = 0.6;
   }
 
   return (
@@ -133,7 +160,9 @@ export default function ParameterListComponent({
               onChange={(event) => handleChangeKey(event, index)}
             />
 
-            <Input
+            
+            {/*
+            false && <Input
               data-testid={getTestId("paramList", index + 100)}
               id={getTestId("paramList", index + 100)}
               type="text"
@@ -153,17 +182,73 @@ export default function ParameterListComponent({
               }}
               suggestions={suggestions}
             />
+            */}
+
+            <Textarea
+              id={getTestId("paramList", index + 400)}
+              data-testid={getTestId("paramList", index + 400)}
+              value={obj[key][0]}
+              disabled={disabled}
+              className={classNames("w-full resize-none", editNode ? "input-edit-node" : "",)}
+              rows={1}
+              placeholder="Type something..."
+              onChange={(event) => {            
+                const pointer = event.target.selectionStart;         
+                
+                if(suggestions && suggestions.length>0){
+                  window.requestAnimationFrame(() => {
+                    event.target.focus();
+                    event.target.selectionStart = pointer;
+                    event.target.selectionEnd = pointer;
+                    event.target.scrollTop = getScrollTop(
+                      event.target.value, 1, event.target.cols, pointer, event.target.clientHeight
+                    );
+                  });
+                  
+                }
+                handleChangeValue(event, index);
+              }}
+              onBlur={(event) => {
+                handleChangeValue(event, index);
+              }}
+              isInput={false}
+              suggestions={suggestions}
+            />
+
+            <ComponentTextModal
+              value={obj[key][0]}
+              setValue={(value) => handleChangeValueBase(value, index)}
+              disabled={disabled}
+              password={false}
+              suggestions={suggestions}
+            >
+                <Button unstyled disabled={disabled} title="Expand text area..." style={{transform: `scaleX(0.6) scaleY(0.6)`,}}>
+                  <IconComponent
+                    strokeWidth={1.5}
+                    id={getTestId("paramListExpand", index + 400)}
+                    name="ExternalLink"
+                    className={classNames(
+                      "icons-parameters-comp shrink-0",
+                      disabled
+                        ? "cursor-not-allowed text-ring"
+                        : "hover:text-accent-foreground",
+                    )}
+                  />
+                </Button>
+            </ComponentTextModal>
+            
 
             <Switch
               id={getTestId("paramList", index + 200)}
               data-testid={getTestId("paramList", index + 200)}
               style={{
-                transform: `scaleX(${scaleX}) scaleY(${scaleY})`,
+                transform: `scaleX(${scaleX}) scaleY(${scaleY}) translateY(50%)`,
               }}
               disabled={disabled}
               className=""
               checked={obj[key][1]}
               onCheckedChange={(isEnabled: boolean) => handleChangeValue2(isEnabled, index)}
+              title="Parse as JSON object. By default, variables are parsed as strings. When this advanced option is enabled, the variable will instead be parsed as a JSON object."
             ></Switch>
 
             {isList &&
