@@ -170,7 +170,7 @@ export const STARTER_NODE_VALUE: FlowType = {
                     "display_id": "starter",
                     "official": false
                   },
-                  "id": "Starter-zzh2C"
+                  "id": "Starter-zzh2C",
                   "description": "Starter component that trigger the flow execution.",
                   "display_name": "Starter"
               },
