@@ -18,7 +18,9 @@ class WaitTimeComponent(Component):
             name="entry",
             display_name="Node Entry",
             #field_type="bool", # if uncommented, will put the input entry of the field on the form
-            input_types=["bool"]
+            input_types=["bool"],
+            can_accept_multiple_edges: True,
+            max_connections: 100,
         ),
         Input(
             name="duration",
