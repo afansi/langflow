@@ -38,7 +38,7 @@ import {
   sourceHandleType,
   targetHandleType,
 } from "../types/flow";
-import { STARTER_NODE_TYPE } from "../flow_constants";
+import { STARTER_NODE_TYPE, OPERANDS_WITH_MULTIPLE_ARGUMENTS, NODE_ENTRY_NAME } from "../flow_constants";
 import {
   addEscapedHandleIdsToEdgesType,
   findLastNodeType,
@@ -1675,7 +1675,239 @@ export function createFlowComponent(
   return flowNode;
 }
 
+export function getDownloadableNodeStates(node: Node, nodes: Node[], edges: Edge[], group: string[]): any[] {
+  
+  if(node.data.type === "note"){
+    return [];
+  }
+
+  let outgoingEdges = edges.filter((e) => e.source === node.id);
+
+  let resultStates: any[] = [];
+  let groupOutputs: OutputFieldType[] = [];
+  let groupFlow: FlowType | undefined  = undefined;
+
+
+  if(node.data.type === "GroupNode"){
+
+    groupFlow = node?.data?.node?.flow;
+    groupOutputs = node?.data?.node?.outputs ?? [];
+
+    let currentGroup: string[] = [
+      ...group,
+      (node?.data?.node?.display_id ?? "") as string,
+    ]
+
+    groupFlow?.data?.nodes.forEach((n)  => {
+      let nodeStates: any[] = getDownloadableNodeStates(n, groupFlow?.data?.nodes ?? [], groupFlow?.data?.edges ?? [], currentGroup);
+      resultStates = [
+        ...resultStates,
+        ...nodeStates,
+      ];
+    });
+
+  }else{
+
+    let myNodeState: any = {};
+
+    myNodeState["id"] = node.id;
+    myNodeState["name"] = node?.data?.node?.display_id ?? node.id;
+    myNodeState["category"] = node?.data?.type;
+    myNodeState["group"] = [...group];
+    myNodeState["transitions"] = node?.data?.node?.outputs?.map((o) => ({event: o.name, next: null})) ?? [];
+
+    const properties: any = {};
+
+    properties["offset"] = node?.position ?? { x: 0, y: 0 };
+
+    const nodeTemplate: APITemplateType = node?.data?.node?.template;
+    Object.keys(nodeTemplate).forEach((key) => {
+      if(!(key.startsWith("_") || key==="code" || key===NODE_ENTRY_NAME)){
+
+        const keyData: InputFieldType = nodeTemplate[key];
+        const keyType: string = keyData.type;
+        if(keyType==="dict"){
+          const dictValue: any[] = [];
+          (keyData?.value ?? []).forEach((o) => {
+            Object.keys(o).forEach((p) => {
+              if(p?.trim().length ?? 0 > 0){
+                dictValue.push({key: p, value: o[p]});
+              }
+            });
+          });
+          properties[key] = dictValue;
+          
+        }else if (keyType === "parameterList"){
+          const paramValue: any[] = [];
+          (keyData?.value ?? []).forEach((o) => {
+            Object.keys(o).forEach((p) => {
+              if(p?.trim().length ?? 0 > 0){
+                paramValue.push({key: p, value: o[p][0], jsonFlag: o[p][1]});
+              }
+            });
+          });
+          properties[key] = paramValue;
+
+        }else if (keyType === "conditionList"){
+          const conditionValue: any[] = [];
+          (keyData?.value ?? []).forEach((o, idx) => {
+            const condName = `Condition_${idx + 1}`;
+            const operand = o[0];
+            const argumentValues: string[] = OPERANDS_WITH_MULTIPLE_ARGUMENTS.includes(operand) ? (o[1] ?? "").split(",") : [o[1]];
+            conditionValue.push({conditionName: condName, operator: operand, arguments: argumentValues.map(argv => argv.trim()).filter((v) => v.length == 0)});
+            
+          });
+          myNodeState["conditions"] = conditionValue;
+
+        }else if (keyType === "NestedDict"){
+          properties[key] = keyData?.value ?? "{}";
+        }else if (keyType === "bool"){
+          properties[key] = keyData?.value ?? false;
+        }else{
+          properties[key] = keyData?.value ?? null;
+        }
+      }
+    });
+
+
+    myNodeState["properties"] = properties;
+    resultStates.push(myNodeState);
+
+  }
+
+  outgoingEdges.forEach((edge) => {
+    let nodeSourceId = "";
+    let nodeSourceField =  "";
+    let nodeTargetId = "";
+    let nodeTargetField =  "";
+    let sourceHandle: sourceHandleType = edge.data.sourceHandle;
+    if (sourceHandle.dataType === "GroupNode" && sourceHandle.id === node.id) {
+      let outputName = sourceHandle.name;
+      let outputIndex = groupOutputs!.findIndex((o) => o.name === outputName);
+      if(outputIndex!==-1 && groupOutputs![outputIndex].proxy){
+        let proxyId = groupOutputs![outputIndex]!.proxy!.id;
+        nodeSourceField = groupOutputs![outputIndex]!.proxy!.name;
+        
+        let nodeIndex = groupFlow!.data!.nodes.findIndex((n) => n.id === proxyId);          
+        if(nodeIndex !== -1){
+          let myLocalNode = groupFlow!.data!.nodes[nodeIndex];
+          nodeSourceId = myLocalNode.data.id;
+          let nodeType = myLocalNode.data.type;
+          while (nodeType === "GroupNode"){
+            outputIndex = myLocalNode.data.node.outputs.findIndex((o) => o.name === nodeSourceField);
+            if(outputIndex!==-1 && myLocalNode.data.node.outputs![outputIndex].proxy){
+              proxyId = myLocalNode.data.node.outputs![outputIndex]!.proxy!.id;
+              nodeSourceField = myLocalNode.data.node.outputs![outputIndex]!.proxy!.name;
+
+              nodeIndex = myLocalNode.data.node!.flow!.data!.nodes.findIndex((n) => n.id === proxyId);
+              if(nodeIndex !== -1){
+                myLocalNode = myLocalNode.data.node!.flow!.data!.nodes[nodeIndex];
+                nodeSourceId = myLocalNode.data.id;
+                nodeType = myLocalNode.data.type;
+              }
+            }
+          }
+        }
+      }
+    }else{
+      nodeSourceId = sourceHandle.id;
+      nodeSourceField = sourceHandle.name;
+    }
+
+
+    let targetHandle: targetHandleType = edge.data.targetHandle;
+    if (targetHandle.proxy && targetHandle.proxy!.id) {
+      nodeTargetId = targetHandle.proxy!.id;
+      nodeTargetField = targetHandle.proxy!.field;
+
+      let nodeIndex = nodes.findIndex((n) => n.id === nodeTargetId);
+      if(nodeIndex !== -1){
+        let myLocalNode = nodes[nodeIndex];
+        while(nodeIndex !== -1 && myLocalNode.data.node!.template[nodeTargetField].proxy){
+          nodeTargetId = myLocalNode.data.node!.template[nodeTargetField].proxy!.id;
+          nodeTargetField = myLocalNode.data.node!.template[nodeTargetField].proxy!.field;
+
+          nodeIndex = myLocalNode.data.node!.data!.nodes.findIndex((n) => n.id === nodeTargetId);
+          if(nodeIndex !== -1){
+            myLocalNode = myLocalNode.data.node!.data!.nodes[nodeIndex];
+          }
+        }
+      }      
+    }else{
+      nodeTargetId = targetHandle.id;
+      nodeTargetField = targetHandle.fieldName;
+    }
+
+    let stateIndex = resultStates.findIndex((n) => n.id === nodeSourceId);
+    if(stateIndex!==-1){
+      let condIndex: number = resultStates[stateIndex].conditions ? resultStates[stateIndex].conditions.findIndex((n) => n.conditionName === nodeSourceField) : -1;
+      let transitionIndex = resultStates[stateIndex]["transitions"].findIndex((n) => n.event === nodeSourceField);
+      if(transitionIndex!==-1){
+        resultStates[stateIndex]["transitions"][transitionIndex]["next"] = nodeTargetId;
+        if(resultStates[stateIndex].conditions && condIndex!==-1){          
+          resultStates[stateIndex]["transitions"][transitionIndex]["event"] = "Match";
+          resultStates[stateIndex]["transitions"][transitionIndex]["conditions"] = [resultStates[stateIndex].conditions[condIndex]];
+          
+        }
+      }
+    }
+  });
+
+  return resultStates;
+
+}
+
+export function getDownloadableFlow(NodeFLow: FlowType): any {
+
+  let myFlow = {};
+  myFlow["name"] = NodeFLow?.name ?? "";
+  myFlow["description"] = NodeFLow.description;
+  const states: any[] = [];
+  NodeFLow.data?.nodes.forEach((node) => {
+      let nodeStates: any[] = getDownloadableNodeStates(node, NodeFLow.data?.nodes ?? [], NodeFLow.data?.edges ?? [], []);
+      nodeStates.forEach((s)=>{
+        if("id" in s){
+          delete s.id;
+        }
+        if("conditions" in s){
+          delete s.conditions;
+        }
+        states.push(s);
+      });
+  });
+  myFlow["states"] = states;
+  let initalStateIndex = NodeFLow.data?.nodes?.findIndex((n) => n.data.type === STARTER_NODE_TYPE) ?? -2;
+  myFlow["initialState"] = initalStateIndex===-2? "" : NodeFLow.data?.nodes[initalStateIndex<0?0:initalStateIndex].data?.node?.display_id ?? "";
+  
+  let metadata = {};
+  const notes: any[] = [];
+  NodeFLow.data?.nodes.filter((n) => n.data.type === "note").forEach((n) => {
+    let myNotes = {};
+    myNotes["description"] = n.data?.node?.description ?? "";
+    myNotes["offset"] = n?.position ?? { x: 0, y: 0 };
+    notes.push(myNotes)
+  });
+  metadata["notes"] = notes;
+  myFlow["metadata"] = metadata;
+
+  return myFlow;
+
+}
+
 export function downloadNode(NodeFLow: FlowType) {
+
+  const myFlow: any = getDownloadableFlow(cloneDeep(NodeFLow)); 
+  
+  const element = document.createElement("a");
+  const file = new Blob([JSON.stringify(myFlow)], {
+    type: "application/json",
+  });
+  element.href = URL.createObjectURL(file);
+  element.download = `${NodeFLow?.name ?? "node"}.json`;
+  element.click();
+}
+
+export function downloadNodeOld(NodeFLow: FlowType) {
   const element = document.createElement("a");
   const file = new Blob([JSON.stringify(NodeFLow)], {
     type: "application/json",
@@ -1759,6 +1991,34 @@ export function extractFieldsFromComponenents(data: APIObjectType) {
 }
 
 export function downloadFlow(
+  flow: FlowType,
+  flowName: string,
+  flowDescription?: string,
+) {
+  let clonedFlow = cloneDeep(flow);
+  removeFileNameFromComponents(clonedFlow);
+
+  const myFlow: any = getDownloadableFlow(clonedFlow);
+
+  // create a data URI with the current flow data
+  const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(
+    JSON.stringify({
+      ...myFlow,
+      name: flowName,
+      description: flowDescription,
+    }),
+  )}`;
+
+  // create a link element and set its properties
+  const link = document.createElement("a");
+  link.href = jsonString;
+  link.download = `${flowName && flowName != "" ? flowName : flow.name}.json`;
+
+  // simulate a click on the link element to trigger the download
+  link.click();
+}
+
+export function downloadFlowOld(
   flow: FlowType,
   flowName: string,
   flowDescription?: string,

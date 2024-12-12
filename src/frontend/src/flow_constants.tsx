@@ -586,4 +586,11 @@ export const OPERANDS_WITH_NO_VALUES: string[] = [
 "isNotBlank",
 ];
 
+export const OPERANDS_WITH_MULTIPLE_ARGUMENTS: string[] = [
+"matchesAnyOf",
+"doesNotMatchAnyOf",
+];
+
+export const NODE_ENTRY_NAME: string = "entry";
+
 

@@ -36,7 +36,7 @@ export default function KeypairListComponent({
   const { data: globalVariables } = useGetGlobalVariables();
 
   const suggestions: string [] = getSuggetionListFromOutputVariables(
-    nodeId===undefined ? nodes: nodes.filter((n) => n.id!==nodeId || (n.data.type!=="note" && n.data.type!=="Group")), 
+    nodeId===undefined ? nodes: nodes.filter((n) => n.id!==nodeId || n.data.type==="GroupNode"), 
     globalVariables
   );
 
