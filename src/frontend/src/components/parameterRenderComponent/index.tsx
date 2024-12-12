@@ -129,15 +129,6 @@ export function ParameterRenderComponent({
             nodeId={nodeId}
           />
         );
-      case "conditionList":
-        return (
-          <ConditionListComponent
-            {...baseInputProps}
-            isList={templateData.list ?? true}
-            id={`conditionalEdge_${id}`}
-            nodeId={nodeId}
-          />
-        );
       case "bool":
         return <ToggleShadComponent {...baseInputProps} id={`toggle_${id}`} />;
       case "link":
