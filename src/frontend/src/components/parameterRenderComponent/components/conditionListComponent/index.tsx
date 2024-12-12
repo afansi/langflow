@@ -39,18 +39,22 @@ export default function ConditionListComponent({
 >): JSX.Element {
   useEffect(() => {
     if (disabled && value.length > 0 && value[0] !== "") {
-      handleOnNewValue({ value: [["", "" ]] }, { skipSnapshot: true });
+      handleOnNewValue({ value: [] }, { skipSnapshot: true });
     }
   }, [disabled]);
 
   // @TODO Recursive Character Text Splitter - the value might be in string format, whereas the InputListComponent specifically requires an array format. To ensure smooth operation and prevent potential errors, it's crucial that we handle the conversion from a string to an array with the string as its element.
   if (typeof value === "string") {
-    value = [[OPERANDS[0], value]];
+    if(value.length > 0){
+      value = [[OPERANDS[0], value]];
+    }else{
+      value = [];
+    }      
   }
 
   if (!value) value = [];
 
-  Array.isArray(value) ? value : [[OPERANDS[0], value]];
+  //Array.isArray(value) ? value : [[OPERANDS[0], value]];
 
   const nodes = useFlowStore((state) => state.nodes);
   const edges = useFlowStore((state) => state.edges);
@@ -67,7 +71,7 @@ export default function ConditionListComponent({
   const { data: globalVariables } = useGetGlobalVariables();
 
   const suggestions: string [] = getSuggetionListFromOutputVariables(
-    nodes.filter((n) => n.id!==nodeId || (n.data.type!=="note" && n.data.type!=="Group")), 
+    nodes.filter((n) => n.id!==nodeId || n.data.type==="GroupNode"), 
     globalVariables
   );
 
