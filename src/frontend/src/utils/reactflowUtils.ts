@@ -1866,15 +1866,13 @@ export function transformDataToFlowType(data: any, templates: { [char: string]: 
         if(!distinctGroups.includes(groupVal)){
           allGroups.push(s.group.toReversed());
           distinctGroups.push(groupVal);
-
-          s.group.forEach(g => {
-            if(!(g in groupNodeDisplayIds)){
-              groupNodeDisplayIds[g] = [];
-            }
-            groupNodeDisplayIds[g].push(displayId);
-          });
-
         }
+        s.group.forEach(g => {
+          if(!(g in groupNodeDisplayIds)){
+            groupNodeDisplayIds[g] = [];
+          }
+          groupNodeDisplayIds[g].push(displayId);
+        });
       }
 
       const nodeTemplate: APITemplateType = nodeData.node!.template;
