@@ -8,6 +8,9 @@ import { useRef } from "react";
 import { api } from "../../api";
 import { getURL } from "../../helpers/constants";
 import { UseRequestProcessor } from "../../services/request-processor";
+import { SAVE_LOAD_TALKY_FORMAT} from "@/flow_constants";
+import {transformDataToFlowType} from "@/utils/reactflowUtils";
+import { useTypesStore } from "@/stores/typesStore";
 
 interface IGetFolder {
   id: string;
@@ -49,7 +52,14 @@ export const useGetFolderQuery: useQueryFunctionType<
     const url = addQueryParams(`${getURL("FOLDERS")}/${params.id}`, params);
     const { data } = await api.get<PaginatedFolderType>(url);
 
-    const { flows } = processFlows(data.flows.items);
+    let returnData = data.flows.items;
+    if (returnData) {
+      if(SAVE_LOAD_TALKY_FORMAT){
+        returnData = returnData.map((v) => transformDataToFlowType(v, useTypesStore.getState().templates));
+      }
+    }
+
+    const { flows } = processFlows(returnData);
 
     const dataProcessed = cloneDeep(data);
     dataProcessed.flows.items = flows;
