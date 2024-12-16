@@ -2205,8 +2205,9 @@ export function getDownloadableNodeStates(node: Node, nodes: Node[], edges: Edge
     if(stateIndex!==-1){
       let condIndex: number = resultStates[stateIndex].conditions ? resultStates[stateIndex].conditions.findIndex((n) => n.conditionName === nodeSourceField) : -1;
       let transitionIndex = resultStates[stateIndex]["transitions"].findIndex((n) => n.event === nodeSourceField);
-      if(transitionIndex!==-1){
-        resultStates[stateIndex]["transitions"][transitionIndex]["next"] = nodeTargetId;
+      let targetIndex = resultStates.findIndex((n) => n.id === nodeTargetId);
+      if(transitionIndex!==-1 && targetIndex!==-1){
+        resultStates[stateIndex]["transitions"][transitionIndex]["next"] = resultStates[targetIndex].name;
         if(resultStates[stateIndex].conditions && condIndex!==-1){          
           resultStates[stateIndex]["transitions"][transitionIndex]["event"] = "Match";
           resultStates[stateIndex]["transitions"][transitionIndex]["conditions"] = [resultStates[stateIndex].conditions[condIndex]];
