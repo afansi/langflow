@@ -42,8 +42,10 @@ import {
   updateGroupRecursion,
   validateNodes,
   addVersionToDisplayIdDuplicates,
+  checkStarterNode,
 } from "../utils/reactflowUtils";
 import { getInputsAndOutputs } from "../utils/storeUtils";
+import { STARTER_NODE_TYPE} from "../flow_constants";
 import useAlertStore from "./alertStore";
 import { useDarkStore } from "./darkStore";
 import useFlowsManagerStore from "./flowsManagerStore";
@@ -317,6 +319,22 @@ const useFlowStore = create<FlowStoreType>((set, get) => ({
       });
       selection.nodes = selection.nodes.filter(
         (node) => node.data.type !== "ChatInput",
+      );
+      selection.edges = selection.edges.filter(
+        (edge) =>
+          selection.nodes.some((node) => edge.source === node.id) &&
+          selection.nodes.some((node) => edge.target === node.id),
+      );
+    }
+    if (
+      selection.nodes.some((node) => node.data.type === STARTER_NODE_TYPE) &&
+      checkStarterNode(get().nodes)
+    ) {
+      useAlertStore.getState().setNoticeData({
+        title: "You can only have one Starter node in a flow.",
+      });
+      selection.nodes = selection.nodes.filter(
+        (node) => node.data.type !== STARTER_NODE_TYPE,
       );
       selection.edges = selection.edges.filter(
         (edge) =>

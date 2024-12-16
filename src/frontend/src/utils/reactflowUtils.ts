@@ -38,7 +38,7 @@ import {
   sourceHandleType,
   targetHandleType,
 } from "../types/flow";
-import { STARTER_NODE_TYPE, OPERANDS_WITH_MULTIPLE_ARGUMENTS, NODE_ENTRY_NAME } from "../flow_constants";
+import { STARTER_NODE_TYPE, OPERANDS, OPERANDS_WITH_MULTIPLE_ARGUMENTS, NODE_ENTRY_NAME, IMPORT_EXPORT_TALKY_FORMAT} from "../flow_constants";
 import {
   addEscapedHandleIdsToEdgesType,
   findLastNodeType,
@@ -53,6 +53,10 @@ const uid = new ShortUniqueId();
 
 export function checkChatInput(nodes: Node[]) {
   return nodes.some((node) => node.data.type === "ChatInput");
+}
+
+export function checkStarterNode(nodes: Node[]) {
+  return nodes.some((node) => node.data.type === STARTER_NODE_TYPE);
 }
 
 export function cleanEdges(nodes: NodeType[], edges: Edge[]) {
@@ -1675,6 +1679,365 @@ export function createFlowComponent(
   return flowNode;
 }
 
+export function simulateGroupNode(flowData: FlowType, selectedNodes: Node[]): boolean {
+  const mySelection: OnSelectionChangeParams = {nodes: selectedNodes, edges: []};
+  if (validateSelection(mySelection!, (flowData.data!.edges)).length === 0) {
+    const clonedNodes = cloneDeep(flowData.data!.nodes);
+    const clonedEdges = cloneDeep(flowData.data!.edges);
+    const clonedSelection = cloneDeep(mySelection);
+    updateIds({ nodes: clonedNodes, edges: clonedEdges }, clonedSelection!);
+    const { newFlow, removedEdges } = generateFlow(
+      clonedSelection!,
+      clonedNodes,
+      clonedEdges,
+      "RandomGroup Name " + uid.randomUUID(5),
+    );
+
+    let groupVariables = {}
+    newFlow?.data?.nodes.forEach((node) => {
+      groupVariables = {
+        ...groupVariables,
+        ...(generateOutPutVariablesFromNodeDisplayId(
+              node?.data?.node?.output_variables ?? {}, 
+              node?.data?.node?.display_id ?? "")
+        )
+      };
+    });
+
+    const myGroupVariables = {...groupVariables };
+
+    const newGroupNode = generateNodeFromFlow(newFlow, myGroupVariables, getNodeId);
+
+    const myNodes = ([
+      ...clonedNodes.filter(
+        (oldNodes) =>
+          !clonedSelection?.nodes.some(
+            (selectionNode) => selectionNode.id === oldNodes.id,
+          ),
+      ),
+      newGroupNode,
+    ]);
+
+    flowData.data!["nodes"] = myNodes;
+
+    const alteredEdges: Array<Edge> = [];
+    removedEdges.forEach((edge: Edge) => {
+      if(newFlow.data?.nodes.some((node) => node.id === edge.target)){
+        let targetHandle: targetHandleType = scapeJSONParse(
+          edge.targetHandle!,
+        );
+        let oldFieldName = targetHandle.fieldName;
+        let oldTargetId = edge.target;
+
+        targetHandle.id = newGroupNode.id;
+        targetHandle.fieldName = oldFieldName + "_" + oldTargetId;
+        targetHandle.proxy = { id: oldTargetId, field: oldFieldName }
+
+        edge.target = newGroupNode.id;
+        edge.targetHandle = scapedJSONStringfy(targetHandle);
+
+        edge.id = getHandleId(edge.source, edge.sourceHandle!, edge.target, edge.targetHandle);
+
+        if (edge.data?.targetHandle) {
+          edge.data.targetHandle = targetHandle;
+        }
+        
+      }else if (newFlow.data?.nodes.some((node) => node.id === edge.source)){
+        let sourceHandle: sourceHandleType = scapeJSONParse(
+          edge.sourceHandle!,
+        );
+        let oldName = sourceHandle.name;
+        let oldSourceId = edge.source;
+
+        sourceHandle.dataType = "GroupNode";
+        sourceHandle.id = newGroupNode.id;
+        sourceHandle.name = oldSourceId + "_" + oldName;
+
+        edge.source = newGroupNode.id;
+        edge.sourceHandle = scapedJSONStringfy(sourceHandle);
+
+        edge.id = getHandleId(edge.source, edge.sourceHandle, edge.target, edge.targetHandle!);
+
+        if (edge.data?.sourceHandle) {
+          edge.data.sourceHandle = sourceHandle;
+        }
+      }
+      alteredEdges.push(edge);
+    });
+
+    const myEdges = [
+      ...clonedEdges.filter(
+        (oldEdge) =>
+          !clonedSelection?.nodes.some((node) => node.id === oldEdge.target) &&
+        !clonedSelection?.nodes.some((node) => node.id === oldEdge.source),
+      ),
+      ...alteredEdges,
+    ];
+    const filteredEdges: Array<Edge> = [];
+    const filteredEdgeIdSet: Set<string> = new Set<string>();
+    myEdges.forEach((edge: Edge) => {
+      if(!filteredEdgeIdSet.has(edge.targetHandle + "#" + edge.sourceHandle)){
+        filteredEdges.push(edge);
+        filteredEdgeIdSet.add(edge.targetHandle + "#" + edge.sourceHandle);
+      }
+    });
+
+    flowData.data!["edges"] = filteredEdges;
+
+    return true;
+    
+
+  } else {
+    return false;
+  }
+}
+
+export function transformDataToFlowType(data: any, templates: { [char: string]: APIClassType }): any {
+
+  // const templates = useTypesStore.getState().templates;
+
+  if(!("states" in data)){
+    return data;
+  }
+
+  const flowData: FlowType = {
+    data: {
+      edges: [],
+      nodes: [],
+      viewport: { x: 1, y: 1, zoom: 1 },
+    },
+    description: data?.description ?? "",
+    name: data?.name ?? "",
+    id: data?.id ?? "",
+  };
+
+  const states: any[] = data.states===null? [] : data.states;
+
+  const matchedNodes: any = {};
+  const matchedCategories: any = {};
+  const stateIdxConditions: any = {};
+  const diplayIds2Idx: any = {};
+  const allGroups: any[] = [];
+  const distinctGroups: string[] = [];
+  const groupNodeDisplayIds: any = {};
+
+  // now create the nodes
+  states.forEach((s, idx) => {
+    const category: string = s?.category ?? "";
+
+    if((category in templates)){
+      const nodeId: string = getNodeId(category);
+
+      
+      
+      matchedNodes[idx] = nodeId;
+      matchedCategories[idx] = category;
+
+      const nodeData: NodeDataType = {
+        type: category,
+        id: nodeId,
+        node: cloneDeep(templates[category]),
+      };
+
+      const node : NodeType = {
+        id: nodeId,
+        type: "genericNode",
+        position: s?.properties?.offset ?? { x: 0, y: 0 },
+        data: nodeData,
+      }
+
+      //fill propertie values
+      nodeData.node!.display_id = s?.name ?? nodeId;
+
+      const displayId = nodeData.node!.display_id;
+
+      diplayIds2Idx[displayId] = idx;
+
+      if((s?.group ?? []).length > 0){
+        const groupVal = s.group.join("@RFlowG@");
+        if(!distinctGroups.includes(groupVal)){
+          allGroups.push(s.group.toReversed());
+          distinctGroups.push(groupVal);
+
+          s.group.forEach(g => {
+            if(!(g in groupNodeDisplayIds)){
+              groupNodeDisplayIds[g] = [];
+            }
+            groupNodeDisplayIds[g].push(displayId);
+          });
+
+        }
+      }
+
+      const nodeTemplate: APITemplateType = nodeData.node!.template;
+      Object.keys(nodeTemplate ?? {}).forEach((key) => {
+        if(!(key.startsWith("_") || key==="code" || key===NODE_ENTRY_NAME) && ((key in (s?.properties ?? {}) && (key!=="offset")) || (nodeTemplate[key].type === "conditionList"))){
+          const keyData: InputFieldType = nodeTemplate[key];
+          const keyType: string = keyData.type;
+
+          if(keyType==="dict"){
+            const dictValue: any[] = [];
+            (s?.properties[key] ?? []).forEach((o) => {
+              if(o?.key?.trim()?.length ?? 0 > 0){
+                const val : any = {};
+                val[o.key.trim()] = o?.value ?? "";
+                dictValue.push(val);
+              }
+            });
+            keyData["value"] = dictValue;
+            
+          }else if (keyType === "parameterList"){
+            const paramValue: any[] = [];
+            (s?.properties[key] ?? []).forEach((o) => {
+              if(o?.key?.trim()?.length ?? 0 > 0){
+                const val : any = {};
+                val[o.key.trim()] = [o?.value ?? "", o?.jsonFlag ?? false];
+                paramValue.push(val);
+              }
+            });
+            keyData["value"] = paramValue;
+  
+          }else if (keyType === "conditionList"){
+            const conditionValue: any[] = [];
+            const conditionNames: any = {};
+            (s?.transitions ?? []).forEach((o, idx1) => {
+              if(o?.event === "Match"){
+                const condName: string = o?.conditions[0]?.conditionName ?? "";
+                const operand: string = o?.conditions[0]?.operator ?? OPERANDS[0];
+                const argValue: string = (o?.conditions[0]?.arguments ?? []).join(",");
+                conditionValue.push([operand, argValue]);
+                conditionNames[idx1] = condName;
+              }
+            });
+            keyData["value"] = conditionValue;
+            stateIdxConditions[idx] = conditionNames;
+  
+          }else if (keyType === "NestedDict"){
+            keyData["value"] = s?.properties[key] ?? "{}";
+          }else if (keyType === "bool"){
+            keyData["value"] = s?.properties[key] ?? false;
+          }else{
+            keyData["value"] = s?.properties[key] ?? undefined;
+          }
+
+        }
+      });
+
+      // add node to the flow
+      flowData.data?.nodes.push(node);
+    }      
+  });
+
+  // now create the edges
+  states.forEach((s, idx) => {
+      if(idx in matchedNodes){
+        (s?.transitions ?? []).forEach((o, idx1) => {
+          if(o?.next !== null && ((o!.next as string ) in diplayIds2Idx)){
+            const edgeData: any = {
+              sourceHandle: {
+                dataType: matchedCategories[idx],
+                id: matchedNodes[idx],
+                name: (o?.event === "Match" && (idx in stateIdxConditions) && (idx1 in stateIdxConditions[idx]))?  stateIdxConditions[idx][idx1] : (o!.event as string),
+                output_types:
+                [
+                    "bool"
+                ],
+              },
+              targetHandle: {
+                fieldName: NODE_ENTRY_NAME,
+                id: matchedNodes[diplayIds2Idx[(o!.next as string )]],
+                inputTypes:
+                [
+                    "bool"
+                ],
+                type: "other",
+              },
+            };
+            // scapedJSONStringfy
+            const edge = {
+              source: matchedNodes[idx],
+              sourceHandle: scapedJSONStringfy(edgeData.sourceHandle),
+              target: matchedNodes[diplayIds2Idx[(o!.next as string )]],
+              targetHandle: scapedJSONStringfy(edgeData.targetHandle),
+              data: edgeData,
+              className: "",
+              id: "",
+            }
+            edge.id = getHandleId(edge.source, edge.sourceHandle, edge.target, edge.targetHandle);
+
+            // add edge to the flow
+            flowData.data?.edges.push(edge as Edge);
+          }
+
+        });
+      }
+  });
+
+  // now add the note nodes
+  if("notes" in (data?.metadata ?? {})){
+    data.metadata.notes.forEach((n, idx) => {
+      const nodeId = getNodeId("note");
+      const node : NodeType = {
+        id: nodeId,
+        type: "noteNode",
+        position: n?.offset ?? { x: 0, y: 0 },
+        data: {
+          type: "note",
+          id: nodeId,
+          node: {
+            description: n?.description ?? "",
+            display_name: "",
+            documentation: "",
+            template: {},
+            output_variables: {},
+            display_id: `note_${idx+1}`,
+          },
+        },
+      };
+
+      // add note nodes to the set of nodes
+      flowData.data?.nodes.push(node);
+    });
+  }
+ 
+  // manage grouping
+  allGroups.sort((a, b) => (b?.length??0) - (a?.length??0));
+  if(allGroups.length > 0){
+    let groupSimulationOutcome: boolean = true;
+    while(allGroups[0].length > 0 && groupSimulationOutcome){
+      let numElts = allGroups[0].length;
+      let j = 0;
+      let processed: string[] = [];
+      while(j<allGroups.length && allGroups[j].length === numElts  && groupSimulationOutcome){
+        const aGroup: string = allGroups[j][0];
+        if((!processed.includes(aGroup)) && (aGroup in groupNodeDisplayIds)){
+          processed.push(aGroup);
+          const selectedNodes = flowData.data?.nodes.filter((n) => groupNodeDisplayIds[aGroup].includes(n.data.node.display_id)) ?? [];
+          if(selectedNodes.length > 0){
+            groupSimulationOutcome = simulateGroupNode(flowData, selectedNodes);
+            if(groupSimulationOutcome){
+              //add resulting group node in the list of next group
+              if(allGroups[j].length > 1  && flowData.data!.nodes.length > 0){
+                const nextGroup: string = allGroups[j][1]; 
+                const nidx = flowData.data!.nodes.length - 1;
+                if(!(nextGroup in groupNodeDisplayIds)){
+                  groupNodeDisplayIds[nextGroup] = [];
+                }
+                groupNodeDisplayIds[nextGroup].push(flowData.data!.nodes[nidx].data.node.display_id);
+              }
+            }
+          }
+        }
+        allGroups[j].splice(0, 1);
+        j = j + 1;
+      }
+    }
+  }
+
+  return flowData;
+
+}
+
 export function getDownloadableNodeStates(node: Node, nodes: Node[], edges: Edge[], group: string[]): any[] {
   
   if(node.data.type === "note"){
@@ -1722,7 +2085,7 @@ export function getDownloadableNodeStates(node: Node, nodes: Node[], edges: Edge
 
     const nodeTemplate: APITemplateType = node?.data?.node?.template;
     Object.keys(nodeTemplate).forEach((key) => {
-      if(!(key.startsWith("_") || key==="code" || key===NODE_ENTRY_NAME)){
+      if(!(key.startsWith("_") || key==="code" || key===NODE_ENTRY_NAME || key==="offset")){
 
         const keyData: InputFieldType = nodeTemplate[key];
         const keyType: string = keyData.type;
@@ -1731,7 +2094,7 @@ export function getDownloadableNodeStates(node: Node, nodes: Node[], edges: Edge
           (keyData?.value ?? []).forEach((o) => {
             Object.keys(o).forEach((p) => {
               if(p?.trim().length ?? 0 > 0){
-                dictValue.push({key: p, value: o[p]});
+                dictValue.push({key: p.trim(), value: o[p]});
               }
             });
           });
@@ -1742,7 +2105,7 @@ export function getDownloadableNodeStates(node: Node, nodes: Node[], edges: Edge
           (keyData?.value ?? []).forEach((o) => {
             Object.keys(o).forEach((p) => {
               if(p?.trim().length ?? 0 > 0){
-                paramValue.push({key: p, value: o[p][0], jsonFlag: o[p][1]});
+                paramValue.push({key: p.trim(), value: o[p][0], jsonFlag: o[p][1]});
               }
             });
           });
@@ -1754,7 +2117,7 @@ export function getDownloadableNodeStates(node: Node, nodes: Node[], edges: Edge
             const condName = `Condition_${idx + 1}`;
             const operand = o[0];
             const argumentValues: string[] = OPERANDS_WITH_MULTIPLE_ARGUMENTS.includes(operand) ? (o[1] ?? "").split(",") : [o[1]];
-            conditionValue.push({conditionName: condName, operator: operand, arguments: argumentValues.map(argv => argv.trim()).filter((v) => v.length == 0)});
+            conditionValue.push({conditionName: condName, operator: operand, arguments: argumentValues.map(argv => argv.trim()).filter((v) => v.length > 0)});
             
           });
           myNodeState["conditions"] = conditionValue;
@@ -1764,7 +2127,7 @@ export function getDownloadableNodeStates(node: Node, nodes: Node[], edges: Edge
         }else if (keyType === "bool"){
           properties[key] = keyData?.value ?? false;
         }else{
-          properties[key] = keyData?.value ?? null;
+          properties[key] = keyData?.value ?? undefined;
         }
       }
     });
@@ -1857,14 +2220,14 @@ export function getDownloadableNodeStates(node: Node, nodes: Node[], edges: Edge
 
 }
 
-export function getDownloadableFlow(NodeFLow: FlowType): any {
-
+export function getDownloadableFlowJsonObject(data: ReactFlowJsonObject | null): any{
   let myFlow = {};
-  myFlow["name"] = NodeFLow?.name ?? "";
-  myFlow["description"] = NodeFLow.description;
+  if(data===null){
+    return myFlow;
+  }
   const states: any[] = [];
-  NodeFLow.data?.nodes.forEach((node) => {
-      let nodeStates: any[] = getDownloadableNodeStates(node, NodeFLow.data?.nodes ?? [], NodeFLow.data?.edges ?? [], []);
+  data.nodes.forEach((node) => {
+      let nodeStates: any[] = getDownloadableNodeStates(node, data.nodes ?? [], data.edges ?? [], []);
       nodeStates.forEach((s)=>{
         if("id" in s){
           delete s.id;
@@ -1876,12 +2239,12 @@ export function getDownloadableFlow(NodeFLow: FlowType): any {
       });
   });
   myFlow["states"] = states;
-  let initalStateIndex = NodeFLow.data?.nodes?.findIndex((n) => n.data.type === STARTER_NODE_TYPE) ?? -2;
-  myFlow["initialState"] = initalStateIndex===-2? "" : NodeFLow.data?.nodes[initalStateIndex<0?0:initalStateIndex].data?.node?.display_id ?? "";
+  let initalStateIndex = data.nodes?.findIndex((n) => n.data.type === STARTER_NODE_TYPE) ?? -2;
+  myFlow["initialState"] = initalStateIndex===-2? "" : data?.nodes[initalStateIndex<0?0:initalStateIndex].data?.node?.display_id ?? "";
   
   let metadata = {};
   const notes: any[] = [];
-  NodeFLow.data?.nodes.filter((n) => n.data.type === "note").forEach((n) => {
+  data.nodes.filter((n) => n.data.type === "note").forEach((n) => {
     let myNotes = {};
     myNotes["description"] = n.data?.node?.description ?? "";
     myNotes["offset"] = n?.position ?? { x: 0, y: 0 };
@@ -1891,12 +2254,27 @@ export function getDownloadableFlow(NodeFLow: FlowType): any {
   myFlow["metadata"] = metadata;
 
   return myFlow;
+}
 
+export function getDownloadableFlow(NodeFLow: FlowType, saveIdFlag: boolean = false): any {
+
+  let myFlow = {};
+  myFlow["name"] = NodeFLow?.name ?? "";
+  myFlow["description"] = NodeFLow.description;
+  if(saveIdFlag){
+    myFlow["id"] = NodeFLow.id;
+  }
+  const stateInfo: any = getDownloadableFlowJsonObject(NodeFLow.data);
+  myFlow = {
+    ...myFlow,
+    ...stateInfo,
+  }
+  return myFlow;
 }
 
 export function downloadNode(NodeFLow: FlowType) {
 
-  const myFlow: any = getDownloadableFlow(cloneDeep(NodeFLow)); 
+  const myFlow: any = IMPORT_EXPORT_TALKY_FORMAT? getDownloadableFlow(cloneDeep(NodeFLow)) : NodeFLow; 
   
   const element = document.createElement("a");
   const file = new Blob([JSON.stringify(myFlow)], {
@@ -1998,7 +2376,7 @@ export function downloadFlow(
   let clonedFlow = cloneDeep(flow);
   removeFileNameFromComponents(clonedFlow);
 
-  const myFlow: any = getDownloadableFlow(clonedFlow);
+  const myFlow: any = IMPORT_EXPORT_TALKY_FORMAT? getDownloadableFlow(clonedFlow): clonedFlow;
 
   // create a data URI with the current flow data
   const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(

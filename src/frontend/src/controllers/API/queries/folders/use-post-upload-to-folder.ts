@@ -2,6 +2,9 @@ import { useMutationFunctionType } from "@/types/api";
 import { api } from "../../api";
 import { getURL } from "../../helpers/constants";
 import { UseRequestProcessor } from "../../services/request-processor";
+import { SAVE_LOAD_TALKY_FORMAT} from "@/flow_constants";
+import {transformDataToFlowType} from "@/utils/reactflowUtils";
+import { useTypesStore } from "@/stores/typesStore";
 
 interface IPostAddUploadFlowToFolder {
   flows: FormData;
@@ -21,7 +24,13 @@ export const usePostUploadFlowToFolder: useMutationFunctionType<
       `${getURL("FLOWS")}/upload/?folder_id=${encodeURIComponent(payload.folderId)}`,
       payload.flows,
     );
-    return res.data;
+    let returnData = res.data;
+    if (returnData) {
+      if(SAVE_LOAD_TALKY_FORMAT){
+        returnData = returnData.map((v) => transformDataToFlowType(v, useTypesStore.getState().templates));
+      }
+    }
+    return returnData;
   };
 
   const mutation = mutate(["usePostUploadFlowToFolder"], uploadFlowToFolderFn, {

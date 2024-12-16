@@ -5,6 +5,9 @@ import { ReactFlowJsonObject } from "reactflow";
 import { api } from "../../api";
 import { getURL } from "../../helpers/constants";
 import { UseRequestProcessor } from "../../services/request-processor";
+import { SAVE_LOAD_TALKY_FORMAT} from "@/flow_constants";
+import {transformDataToFlowType, getDownloadableFlowJsonObject} from "@/utils/reactflowUtils";
+import {useTypesStore} from "@/stores/typesStore";
 
 interface IPostAddFlow {
   name: string;
@@ -25,14 +28,16 @@ export const usePostAddFlow: useMutationFunctionType<
   const postAddFlowFn = async (payload: IPostAddFlow): Promise<any> => {
     const response = await api.post(`${getURL("FLOWS")}/`, {
       name: payload.name,
-      data: payload.data,
+      data: !SAVE_LOAD_TALKY_FORMAT ? payload.data : getDownloadableFlowJsonObject(payload.data),
       description: payload.description,
       is_component: payload.is_component,
       folder_id: payload.folder_id || null,
       endpoint_name: payload.endpoint_name || null,
     });
 
-    return response.data;
+    const flowData: any = !SAVE_LOAD_TALKY_FORMAT ? response.data : transformDataToFlowType(response.data, useTypesStore.getState().templates);
+
+    return flowData;
   };
 
   const mutation: UseMutationResult<IPostAddFlow, any, IPostAddFlow> = mutate(

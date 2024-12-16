@@ -591,5 +591,9 @@ export const OPERANDS_WITH_MULTIPLE_ARGUMENTS: string[] = [
 "doesNotMatchAnyOf",
 ];
 
+export const SAVE_LOAD_TALKY_FORMAT: boolean = true;
+
+export const IMPORT_EXPORT_TALKY_FORMAT: boolean = true;
+
 export const NODE_ENTRY_NAME: string = "entry";
 

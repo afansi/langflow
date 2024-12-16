@@ -4,6 +4,9 @@ import { FlowType } from "@/types/flow";
 import { api } from "../../api";
 import { getURL } from "../../helpers/constants";
 import { UseRequestProcessor } from "../../services/request-processor";
+import { SAVE_LOAD_TALKY_FORMAT} from "@/flow_constants";
+import {transformDataToFlowType} from "@/utils/reactflowUtils";
+import {useTypesStore} from "@/stores/typesStore";
 
 export const useGetBasicExamplesQuery: useQueryFunctionType<
   undefined,
@@ -13,15 +16,23 @@ export const useGetBasicExamplesQuery: useQueryFunctionType<
   const setExamples = useFlowsManagerStore((state) => state.setExamples);
 
   const getBasicExamplesFn = async () => {
-    return await api.get<FlowType[]>(`${getURL("FLOWS")}/basic_examples/`);
+    if(SAVE_LOAD_TALKY_FORMAT){
+      return await api.get<any[]>(`${getURL("FLOWS")}/basic_examples/`);
+    }else{
+      return await api.get<FlowType[]>(`${getURL("FLOWS")}/basic_examples/`);
+    }
   };
 
   const responseFn = async () => {
     const { data } = await getBasicExamplesFn();
-    if (data) {
-      setExamples(data);
+    let returnData = data;
+    if (returnData) {
+      if(SAVE_LOAD_TALKY_FORMAT){
+        returnData = returnData.map((v) => transformDataToFlowType(v, useTypesStore.getState().templates));
+      }
+      setExamples(returnData);
     }
-    return data;
+    return returnData;
   };
 
   const queryResult = query(["useGetBasicExamplesQuery"], responseFn, {

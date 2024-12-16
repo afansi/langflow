@@ -12,6 +12,8 @@ import { UseMutationOptions } from "@tanstack/react-query";
 import { api } from "../../api";
 import { getURL } from "../../helpers/constants";
 import { UseRequestProcessor } from "../../services/request-processor";
+import { SAVE_LOAD_TALKY_FORMAT} from "@/flow_constants";
+import {transformDataToFlowType} from "@/utils/reactflowUtils";
 
 interface GetFlowsParams {
   components_only?: boolean;
@@ -40,8 +42,14 @@ export const useGetRefreshFlows: useMutationFunctionType<
     params: GetFlowsParams,
   ): Promise<FlowType[] | PaginatedFlowsType> => {
     const url = addQueryParams(`${getURL("FLOWS")}/`, params);
-    const { data } = await api.get<FlowType[]>(url);
-    return data;
+    const { data } = await api.get<any[]>(url);
+    let returnData = data;
+    if (returnData) {
+      if(SAVE_LOAD_TALKY_FORMAT){
+        returnData = returnData.map((v) => transformDataToFlowType(v, useTypesStore.getState().templates));
+      }
+    }
+    return returnData;
   };
 
   const mutationFn = async (
