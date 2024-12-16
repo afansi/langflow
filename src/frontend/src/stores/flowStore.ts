@@ -43,6 +43,7 @@ import {
   validateNodes,
   addVersionToDisplayIdDuplicates,
   checkStarterNode,
+  checkEdgesOnStarterNodes,
 } from "../utils/reactflowUtils";
 import { getInputsAndOutputs } from "../utils/storeUtils";
 import { STARTER_NODE_TYPE} from "../flow_constants";
@@ -330,17 +331,24 @@ const useFlowStore = create<FlowStoreType>((set, get) => ({
       selection.nodes.some((node) => node.data.type === STARTER_NODE_TYPE) &&
       checkStarterNode(get().nodes)
     ) {
-      useAlertStore.getState().setNoticeData({
-        title: "You can only have one Starter node in a flow.",
-      });
-      selection.nodes = selection.nodes.filter(
-        (node) => node.data.type !== STARTER_NODE_TYPE,
-      );
-      selection.edges = selection.edges.filter(
-        (edge) =>
-          selection.nodes.some((node) => edge.source === node.id) &&
-          selection.nodes.some((node) => edge.target === node.id),
-      );
+      if(checkEdgesOnStarterNodes(get().nodes, get().edges)){
+        useAlertStore.getState().setNoticeData({
+          title: "You can only have one Starter node in a flow.",
+        });
+        selection.nodes = selection.nodes.filter(
+          (node) => node.data.type !== STARTER_NODE_TYPE,
+        );
+        selection.edges = selection.edges.filter(
+          (edge) =>
+            selection.nodes.some((node) => edge.source === node.id) &&
+            selection.nodes.some((node) => edge.target === node.id),
+        );
+      }else{
+        // we remove the starter nodes from the existing flow if no edge attached to him
+        get().setNodes(get().nodes.filter(
+          (node) => node.data.type !== STARTER_NODE_TYPE,
+        ));
+      }
     }
     if (selection.nodes) {
       if (checkOldComponents({ nodes: selection.nodes ?? [] })) {

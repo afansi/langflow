@@ -59,6 +59,14 @@ export function checkStarterNode(nodes: Node[]) {
   return nodes.some((node) => node.data.type === STARTER_NODE_TYPE);
 }
 
+export function checkEdgesOnStarterNodes(nodes: Node[], edges: Edge[]) {
+  const starterIds = nodes.filter(n => n.data.type === STARTER_NODE_TYPE).map(n => n.id);
+  if(starterIds.length === 0){
+    return false;
+  }
+  return edges.some((e) => starterIds.includes(e.source) || starterIds.includes(e.target));
+}
+
 export function cleanEdges(nodes: NodeType[], edges: Edge[]) {
   let newEdges = cloneDeep(edges);
   edges.forEach((edge) => {
@@ -2076,7 +2084,9 @@ export function getDownloadableNodeStates(node: Node, nodes: Node[], edges: Edge
     myNodeState["id"] = node.id;
     myNodeState["name"] = node?.data?.node?.display_id ?? node.id;
     myNodeState["category"] = node?.data?.type;
-    myNodeState["group"] = [...group];
+    if(group.length > 0){
+      myNodeState["group"] = [...group];
+    }
     myNodeState["transitions"] = node?.data?.node?.outputs?.map((o) => ({event: o.name, next: null})) ?? [];
 
     const properties: any = {};
@@ -2205,9 +2215,8 @@ export function getDownloadableNodeStates(node: Node, nodes: Node[], edges: Edge
     if(stateIndex!==-1){
       let condIndex: number = resultStates[stateIndex].conditions ? resultStates[stateIndex].conditions.findIndex((n) => n.conditionName === nodeSourceField) : -1;
       let transitionIndex = resultStates[stateIndex]["transitions"].findIndex((n) => n.event === nodeSourceField);
-      let targetIndex = resultStates.findIndex((n) => n.id === nodeTargetId);
-      if(transitionIndex!==-1 && targetIndex!==-1){
-        resultStates[stateIndex]["transitions"][transitionIndex]["next"] = resultStates[targetIndex].name;
+      if(transitionIndex!==-1){
+        resultStates[stateIndex]["transitions"][transitionIndex]["next"] = nodeTargetId;
         if(resultStates[stateIndex].conditions && condIndex!==-1){          
           resultStates[stateIndex]["transitions"][transitionIndex]["event"] = "Match";
           resultStates[stateIndex]["transitions"][transitionIndex]["conditions"] = [resultStates[stateIndex].conditions[condIndex]];
@@ -2230,15 +2239,27 @@ export function getDownloadableFlowJsonObject(data: ReactFlowJsonObject | null):
   data.nodes.forEach((node) => {
       let nodeStates: any[] = getDownloadableNodeStates(node, data.nodes ?? [], data.edges ?? [], []);
       nodeStates.forEach((s)=>{
-        if("id" in s){
-          delete s.id;
-        }
         if("conditions" in s){
           delete s.conditions;
         }
         states.push(s);
       });
   });
+  for(let idx=0; idx<states.length; idx++){
+    for(let j=0; j<states[idx].transitions.length; j++){
+      if(states[idx].transitions[j].next!==null){
+        let stateIndex = states.findIndex((n) => n.id === states[idx].transitions[j].next);
+        if(stateIndex!==-1){
+          states[idx].transitions[j].next = states[stateIndex].name;
+        }
+      }
+    }
+  }
+  for(let idx=0; idx<states.length; idx++){
+    if("id" in states[idx]){
+      delete states[idx].id;
+    }
+  }
   myFlow["states"] = states;
   let initalStateIndex = data.nodes?.findIndex((n) => n.data.type === STARTER_NODE_TYPE) ?? -2;
   myFlow["initialState"] = initalStateIndex===-2? "" : data?.nodes[initalStateIndex<0?0:initalStateIndex].data?.node?.display_id ?? "";
