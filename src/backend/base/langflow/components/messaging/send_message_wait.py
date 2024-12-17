@@ -151,23 +151,23 @@ class SendMessageAndWaitResponseComponent(Component):
     ]
     
     output_variables = {
-    	"{{states.${NODE_DISPLAY_ID}.sent.body}}" : "string", 
-    	"{{states.${NODE_DISPLAY_ID}.sent.src}}" : "string", 
-    	"{{states.${NODE_DISPLAY_ID}.sent.dest}}" : "string", 
-    	"{{states.${NODE_DISPLAY_ID}.sent.mediaUrl}}" : "list", 
-    	"{{states.${NODE_DISPLAY_ID}.sent.mediaUrl0}}" : "string", 
-    	"{{states.${NODE_DISPLAY_ID}.sent.numMedia}}" : "int", 
-    	"{{states.${NODE_DISPLAY_ID}.sent.status}}" : "string", 
-    	"{{states.${NODE_DISPLAY_ID}.sent.messageId}}" : "string",     	
+    	"{{nodes.${NODE_DISPLAY_ID}.sent.body}}" : "string", 
+    	"{{nodes.${NODE_DISPLAY_ID}.sent.src}}" : "string", 
+    	"{{nodes.${NODE_DISPLAY_ID}.sent.dest}}" : "string", 
+    	"{{nodes.${NODE_DISPLAY_ID}.sent.mediaUrl}}" : "list", 
+    	"{{nodes.${NODE_DISPLAY_ID}.sent.mediaUrl0}}" : "string", 
+    	"{{nodes.${NODE_DISPLAY_ID}.sent.numMedia}}" : "int", 
+    	"{{nodes.${NODE_DISPLAY_ID}.sent.status}}" : "string", 
+    	"{{nodes.${NODE_DISPLAY_ID}.sent.messageId}}" : "string",     	
     	
-    	"{{states.${NODE_DISPLAY_ID}.received.body}}" : "string", 
-    	"{{states.${NODE_DISPLAY_ID}.received.src}}" : "string", 
-    	"{{states.${NODE_DISPLAY_ID}.received.dest}}" : "string", 
-    	"{{states.${NODE_DISPLAY_ID}.received.mediaUrl}}" : "list", 
-    	"{{states.${NODE_DISPLAY_ID}.received.mediaUrl0}}" : "string", 
-    	"{{states.${NODE_DISPLAY_ID}.received.numMedia}}" : "int", 
-    	"{{states.${NODE_DISPLAY_ID}.received.richContent}}" : "dict", 
-    	"{{states.${NODE_DISPLAY_ID}.received.messageId}}" : "string", 
+    	"{{nodes.${NODE_DISPLAY_ID}.received.body}}" : "string", 
+    	"{{nodes.${NODE_DISPLAY_ID}.received.src}}" : "string", 
+    	"{{nodes.${NODE_DISPLAY_ID}.received.dest}}" : "string", 
+    	"{{nodes.${NODE_DISPLAY_ID}.received.mediaUrl}}" : "list", 
+    	"{{nodes.${NODE_DISPLAY_ID}.received.mediaUrl0}}" : "string", 
+    	"{{nodes.${NODE_DISPLAY_ID}.received.numMedia}}" : "int", 
+    	"{{nodes.${NODE_DISPLAY_ID}.received.richContent}}" : "dict", 
+    	"{{nodes.${NODE_DISPLAY_ID}.received.messageId}}" : "string", 
     	
     	
     }

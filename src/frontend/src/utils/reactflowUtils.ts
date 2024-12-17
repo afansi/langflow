@@ -2600,3 +2600,28 @@ export function someFlowTemplateFields(
   });
 }
 
+export function getCurrentNodeDisplayIds(node: Node): string[] { 
+  let result: string[] = [node?.data?.node?.display_id?.toLowerCase() ?? ""];  
+  if(node.data.type === "GroupNode"){
+    let groupFlow: FlowType | undefined = node?.data?.node?.flow;
+    groupFlow?.data?.nodes.forEach((n)  => {
+      let nodeDisplayIds: string[] = getCurrentNodeDisplayIds(n);
+      result = [
+        ...result,
+        ...nodeDisplayIds,
+      ];
+    });
+  }  
+  return result;  
+}
+
+export function getAllNodeDisplayIds(nodes: Node[]): string[]{  
+  const displayIds: string[] = [];
+  nodes?.forEach((node) => {
+      let nodeDisplayIds: string[] = getCurrentNodeDisplayIds(node);
+      nodeDisplayIds.forEach((s)=>{
+        displayIds.push(s);
+      });
+  });
+  return displayIds;
+}
