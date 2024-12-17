@@ -1906,17 +1906,27 @@ export function transformDataToFlowType(data: any, templates: { [char: string]: 
           }else if (keyType === "conditionList"){
             const conditionValue: any[] = [];
             const conditionNames: any = {};
+            const outputs = cloneDeep(nodeData.node?.outputs ?? []);
             (s?.transitions ?? []).forEach((o, idx1) => {
               if(o?.event === "Match"){
                 const condName: string = o?.conditions[0]?.conditionName ?? "";
                 const operand: string = o?.conditions[0]?.operator ?? OPERANDS[0];
                 const argValue: string = (o?.conditions[0]?.arguments ?? []).join(",");
-                conditionValue.push([operand, argValue]);
+                conditionValue.push([condName, operand, argValue]);
                 conditionNames[idx1] = condName;
+                if(outputs.length > 0){
+                  const anOutput = cloneDeep(outputs[0]);
+                  anOutput.name = condName;
+                  anOutput.display_name = condName;
+                  anOutput.hidden = false;
+
+                  outputs.push(anOutput);
+                }
               }
             });
             keyData["value"] = conditionValue;
             stateIdxConditions[idx] = conditionNames;
+            nodeData.node!.outputs = outputs;
   
           }else if (keyType === "NestedDict"){
             keyData["value"] = s?.properties[key] ?? "{}";
@@ -2122,9 +2132,9 @@ export function getDownloadableNodeStates(node: Node, nodes: Node[], edges: Edge
         }else if (keyType === "conditionList"){
           const conditionValue: any[] = [];
           (keyData?.value ?? []).forEach((o, idx) => {
-            const condName = `Condition_${idx + 1}`;
-            const operand = o[0];
-            const argumentValues: string[] = OPERANDS_WITH_MULTIPLE_ARGUMENTS.includes(operand) ? (o[1] ?? "").split(",") : [o[1]];
+            const condName = o[0];
+            const operand = o[1];
+            const argumentValues: string[] = OPERANDS_WITH_MULTIPLE_ARGUMENTS.includes(operand) ? (o[2] ?? "").split(",") : [o[2]];
             conditionValue.push({conditionName: condName, operator: operand, arguments: argumentValues.map(argv => argv.trim()).filter((v) => v.length > 0)});
             
           });
