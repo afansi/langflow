@@ -141,14 +141,14 @@ class SendMessageComponent(Component):
     ]
     
     output_variables = {
-    	"{{states.${NODE_DISPLAY_ID}.sent.body}}" : "string", 
-    	"{{states.${NODE_DISPLAY_ID}.sent.src}}" : "string", 
-    	"{{states.${NODE_DISPLAY_ID}.sent.dest}}" : "string", 
-    	"{{states.${NODE_DISPLAY_ID}.sent.mediaUrl}}" : "list", 
-    	"{{states.${NODE_DISPLAY_ID}.sent.mediaUrl0}}" : "string", 
-    	"{{states.${NODE_DISPLAY_ID}.sent.numMedia}}" : "int", 
-    	"{{states.${NODE_DISPLAY_ID}.sent.status}}" : "string", 
-    	"{{states.${NODE_DISPLAY_ID}.sent.messageId}}" : "string", 
+    	"{{nodes.${NODE_DISPLAY_ID}.sent.body}}" : "string", 
+    	"{{nodes.${NODE_DISPLAY_ID}.sent.src}}" : "string", 
+    	"{{nodes.${NODE_DISPLAY_ID}.sent.dest}}" : "string", 
+    	"{{nodes.${NODE_DISPLAY_ID}.sent.mediaUrl}}" : "list", 
+    	"{{nodes.${NODE_DISPLAY_ID}.sent.mediaUrl0}}" : "string", 
+    	"{{nodes.${NODE_DISPLAY_ID}.sent.numMedia}}" : "int", 
+    	"{{nodes.${NODE_DISPLAY_ID}.sent.status}}" : "string", 
+    	"{{nodes.${NODE_DISPLAY_ID}.sent.messageId}}" : "string", 
     }
     
     

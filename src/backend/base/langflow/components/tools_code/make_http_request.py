@@ -104,10 +104,10 @@ class MakeHttpRequestComponent(Component):
     ]
 
     output_variables = {
-    	"{{states.${NODE_DISPLAY_ID}.statusCode}}" : "int", 
-    	"{{states.${NODE_DISPLAY_ID}.body}}" : "string", 
-    	"{{states.${NODE_DISPLAY_ID}.contentType}}" : "string", 
-    	"{{states.${NODE_DISPLAY_ID}.parsedBody}}" : "dict", 
+    	"{{nodes.${NODE_DISPLAY_ID}.statusCode}}" : "int", 
+    	"{{nodes.${NODE_DISPLAY_ID}.body}}" : "string", 
+    	"{{nodes.${NODE_DISPLAY_ID}.contentType}}" : "string", 
+    	"{{nodes.${NODE_DISPLAY_ID}.parsedBody}}" : "dict", 
     }
     
     

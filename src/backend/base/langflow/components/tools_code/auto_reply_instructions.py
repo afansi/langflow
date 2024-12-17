@@ -64,7 +64,7 @@ class GetAutoReplyInstructionsComponent(Component):
     ]
 
     output_variables = {
-    	"{{states.${NODE_DISPLAY_ID}}}" : "dict", 
+    	"{{nodes.${NODE_DISPLAY_ID}}}" : "dict", 
     }
     
     
