@@ -145,7 +145,7 @@ export function detectBrokenEdgesEdges(nodes: NodeType[], edges: Edge[]) {
         displayName: targetNode.data.node!.display_name,
         field:
           targetNode.data.node!.template[targetHandleObject.fieldName]
-            .display_name,
+            ?.display_name,
       },
     };
   }
@@ -453,13 +453,12 @@ export function updateIds(
       if (edge.data?.targetHandle?.id) {
         edge.data.targetHandle.id = edge.target;
       }
-      edge.id =
-        "reactflow__edge-" +
-        edge.source +
-        edge.sourceHandle +
-        "-" +
-        edge.target +
-        edge.targetHandle;
+      edge.id = getHandleId(
+        edge.source,
+        edge.sourceHandle,
+        edge.target,
+        edge.targetHandle
+      );
     });
   return idsMap;
 }
@@ -1186,7 +1185,7 @@ export function mergeNodeTemplates({
     Object.keys(nodeTemplate)
       .filter((field_name) => field_name.charAt(0) !== "_")
       .forEach((key) => {
-        if (!isTargetHandleConnected(edges, key, nodeTemplate[key], node.id)) {
+        if (!isTargetHandleConnected(edges, key, nodeTemplate[key], node.id) || ((nodeTemplate[key].can_accept_multiple_edges ?? false) && ((nodeTemplate[key].max_connections ?? 1) > 1))) {
           template[key + "_" + node.id] = nodeTemplate[key];
           template[key + "_" + node.id].proxy = { id: node.id, field: key };
           if (node.type === "groupNode") {
@@ -1609,6 +1608,14 @@ export function expandGroupNode(
         // gNodes[nodeIndex].selected = false;
         if (proxy) {
           gNodes[nodeIndex].data.node!.template[field].proxy = proxy;
+          // update the edges if needed eventually
+          gEdges.filter(
+            e => e.target===gNodes[nodeIndex].id && e.data?.targetHandle?.fieldName===field
+          ).forEach(e => {
+            e.data.targetHandle.proxy = proxy;
+            e.targetHandle = scapedJSONStringfy(e.data.targetHandle);
+            e.id = getHandleId(e.source, e.sourceHandle!, e.target, e.targetHandle!);
+          });
         } else {
           delete gNodes[nodeIndex].data.node!.template[field].proxy;
         }
@@ -1630,6 +1637,60 @@ export function expandGroupNode(
     }
   });
 
+  // log for debug - make sure all extracted nodes and edges are legit
+  /*
+  console.log("ExtractedEdges: \n" + JSON.stringify(gEdges));
+  console.log("ExtractedNodes: \n" + JSON.stringify(gNodes.map(n=>n.id)));
+  console.log("ConformedEdges: \n" + JSON.stringify(gEdges.map((e) => {
+    let srcIdx = gNodes.findIndex(n=>n.id===e.data.sourceHandle.id);
+    if(srcIdx !== -1 && (gNodes[srcIdx].data.node!.outputs!.findIndex(o => o.name === e.data.sourceHandle.name)!==-1)){
+      let dstIdx = gNodes.findIndex(n=>n.id===e.data.targetHandle.id);
+      if(dstIdx !== -1 && (e.data.targetHandle.fieldName in gNodes[dstIdx].data.node!.template)){
+        let tmpTgtHandle  = scapedJSONStringfy(e.data.targetHandle);
+        const targetHandleObject: targetHandleType = scapeJSONParse(e.targetHandle!);
+        const field = targetHandleObject.fieldName;
+        const id: targetHandleType = {
+          type: gNodes[dstIdx].data.node!.template[field]?.type,
+          fieldName: field,
+          id: gNodes[dstIdx].data.id,
+          inputTypes: gNodes[dstIdx].data.node!.template[field]?.input_types,
+        };
+        if (gNodes[dstIdx].data.node!.template[field]?.proxy) {
+          id.proxy = gNodes[dstIdx].data.node!.template[field]?.proxy;
+        }
+        let vTmp = scapedJSONStringfy(id);
+        if (vTmp === e.targetHandle) {
+          let tmpSrcHandle  = scapedJSONStringfy(e.data.sourceHandle);
+          const parsedSourceHandle = scapeJSONParse(e.sourceHandle!);
+          const name = parsedSourceHandle.name;
+          const output = gNodes[srcIdx].data.node!.outputs?.find(
+            (output) => output.name === name,
+          );
+          if (output) {
+            const outputTypes =
+              output!.types.length === 1 ? output!.types : [output!.selected!];
+
+            const id: sourceHandleType = {
+              id: gNodes[srcIdx].data.id,
+              name: name,
+              output_types: outputTypes,
+              dataType: gNodes[srcIdx].data.type,
+            };
+            vTmp = scapedJSONStringfy(id);
+            if (vTmp === e.sourceHandle) {
+              return true;
+            }else{
+              console.log("srcErr:\n" + vTmp + "\n"   + tmpSrcHandle + "\n" + e.sourceHandle);
+            }
+          }
+        }else{
+          console.log("tgtErr:\n" + vTmp + "\n"  + tmpTgtHandle + "\n" + e.targetHandle);
+        }
+      }
+    }
+    return false;
+  })));
+  */
   
   const filteredNodes = [...nodes.filter((n) => n.id !== id), ...gNodes];
   const filteredEdges = [
@@ -2015,11 +2076,13 @@ export function transformDataToFlowType(data: any, templates: { [char: string]: 
       flowData.data?.nodes.push(node);
     });
   }
+
+  let groupSimulationOutcome: boolean = true;
+  const noGroupingResult = cloneDeep(flowData);
  
   // manage grouping
   allGroups.sort((a, b) => (b?.length??0) - (a?.length??0));
-  if(allGroups.length > 0){
-    let groupSimulationOutcome: boolean = true;
+  if(allGroups.length > 0){    
     while(allGroups[0].length > 0 && groupSimulationOutcome){
       let numElts = allGroups[0].length;
       let j = 0;
@@ -2034,12 +2097,14 @@ export function transformDataToFlowType(data: any, templates: { [char: string]: 
             if(groupSimulationOutcome){
               //add resulting group node in the list of next group
               if(allGroups[j].length > 1  && flowData.data!.nodes.length > 0){
-                const nextGroup: string = allGroups[j][1]; 
                 const nidx = flowData.data!.nodes.length - 1;
-                if(!(nextGroup in groupNodeDisplayIds)){
-                  groupNodeDisplayIds[nextGroup] = [];
-                }
-                groupNodeDisplayIds[nextGroup].push(flowData.data!.nodes[nidx].data.node.display_id);
+                for(let k=1; k<allGroups[j].length; k++){
+                  const nextGroup: string = allGroups[j][k]; 
+                  if(!(nextGroup in groupNodeDisplayIds)){
+                    groupNodeDisplayIds[nextGroup] = [];
+                  }
+                  groupNodeDisplayIds[nextGroup].push(flowData.data!.nodes[nidx].data.node.display_id);
+                }                
               }
             }
           }
@@ -2050,7 +2115,7 @@ export function transformDataToFlowType(data: any, templates: { [char: string]: 
     }
   }
 
-  return flowData;
+  return groupSimulationOutcome? flowData: noGroupingResult;
 
 }
 
@@ -2198,19 +2263,19 @@ export function getDownloadableNodeStates(node: Node, nodes: Node[], edges: Edge
 
     let targetHandle: targetHandleType = edge.data.targetHandle;
     if (targetHandle.proxy && targetHandle.proxy!.id) {
-      nodeTargetId = targetHandle.proxy!.id;
-      nodeTargetField = targetHandle.proxy!.field;
+      nodeTargetId = targetHandle.id;
+      nodeTargetField = targetHandle.fieldName;
 
       let nodeIndex = nodes.findIndex((n) => n.id === nodeTargetId);
       if(nodeIndex !== -1){
         let myLocalNode = nodes[nodeIndex];
-        while(nodeIndex !== -1 && myLocalNode.data.node!.template[nodeTargetField].proxy){
+        while(nodeIndex !== -1 && myLocalNode.data.node!.template[nodeTargetField]?.proxy){
           nodeTargetId = myLocalNode.data.node!.template[nodeTargetField].proxy!.id;
           nodeTargetField = myLocalNode.data.node!.template[nodeTargetField].proxy!.field;
 
-          nodeIndex = myLocalNode.data.node!.data!.nodes.findIndex((n) => n.id === nodeTargetId);
+          nodeIndex = myLocalNode.data.node!.flow!.data!.nodes.findIndex((n) => n.id === nodeTargetId);
           if(nodeIndex !== -1){
-            myLocalNode = myLocalNode.data.node!.data!.nodes[nodeIndex];
+            myLocalNode = myLocalNode.data.node!.flow!.data!.nodes[nodeIndex];
           }
         }
       }      
