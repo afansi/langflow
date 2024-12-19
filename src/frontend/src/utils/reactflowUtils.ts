@@ -1185,7 +1185,9 @@ export function mergeNodeTemplates({
     Object.keys(nodeTemplate)
       .filter((field_name) => field_name.charAt(0) !== "_")
       .forEach((key) => {
-        if (!isTargetHandleConnected(edges, key, nodeTemplate[key], node.id) || ((nodeTemplate[key].can_accept_multiple_edges ?? false) && ((nodeTemplate[key].max_connections ?? 1) > 1))) {
+        const isHandleConnected: boolean = isTargetHandleConnected(edges, key, nodeTemplate[key], node.id);
+        const canHaveMultipleConnections: boolean = (nodeTemplate[key].can_accept_multiple_edges ?? false) && ((nodeTemplate[key].max_connections ?? 1) > 1);
+        if (!isHandleConnected || (canHaveMultipleConnections)) {
           template[key + "_" + node.id] = nodeTemplate[key];
           template[key + "_" + node.id].proxy = { id: node.id, field: key };
           if (node.type === "groupNode") {
