@@ -2082,7 +2082,7 @@ export function transformDataToFlowType(data: any, templates: { [char: string]: 
  
   // manage grouping
   allGroups.sort((a, b) => (b?.length??0) - (a?.length??0));
-  if(allGroups.length > 0){    
+  if(allGroups.length > 0){
     while(allGroups[0].length > 0 && groupSimulationOutcome){
       let numElts = allGroups[0].length;
       let j = 0;
@@ -2104,7 +2104,7 @@ export function transformDataToFlowType(data: any, templates: { [char: string]: 
                     groupNodeDisplayIds[nextGroup] = [];
                   }
                   groupNodeDisplayIds[nextGroup].push(flowData.data!.nodes[nidx].data.node.display_id);
-                }                
+                }
               }
             }
           }
@@ -2700,3 +2700,4 @@ export function getAllNodeDisplayIds(nodes: Node[]): string[]{
   });
   return displayIds;
 }
+
