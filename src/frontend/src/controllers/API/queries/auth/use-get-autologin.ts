@@ -43,7 +43,11 @@ export const useGetAutoLogin: useQueryFunctionType<undefined, undefined> = (
         setAutoLogin(false);
         if (!isLoginPage) {
           if (!isAuthenticated) {
-            await mutationLogout();
+            try {
+              await mutationLogout();
+            } catch (err) {
+              console.error("Auto-login fallback logout failed:", err);
+            }
             navigate("/login");
           } else {
             getUser();
