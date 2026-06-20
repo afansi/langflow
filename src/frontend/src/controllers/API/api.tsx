@@ -29,7 +29,7 @@ function ApiInterceptor() {
   );
 
   const { mutate: mutationLogout } = useLogout();
-  const { mutate: mutationRenewAccessToken } = useRefreshAccessToken();
+  const { mutateAsync: mutationRenewAccessToken } = useRefreshAccessToken();
   const isLoginPage = location.pathname.includes("login");
   const customHeaders = useCustomApiHeaders();
 
@@ -55,6 +55,14 @@ function ApiInterceptor() {
           error?.response?.status === 403 || error?.response?.status === 401;
 
         if (isAuthenticationError) {
+          if (
+            isAuthorizedURL(error?.config?.url) ||
+            error?.config?.url?.includes("refresh") ||
+            error?.config?.url?.includes("login") ||
+            error?.config?.url?.includes("logout")
+          ) {
+            return Promise.reject(error);
+          }
           if (autoLogin !== undefined && !autoLogin) {
             if (error?.config?.url?.includes("github")) {
               return Promise.reject(error);
@@ -64,43 +72,37 @@ function ApiInterceptor() {
               return Promise.reject(error);
             }
 
-            await tryToRenewAccessToken(error);
-
-            const accessToken = cookies.get(LANGFLOW_ACCESS_TOKEN);
-            if (!accessToken && error?.config?.url?.includes("login")) {
-              return Promise.reject(error);
-            }
+            return tryToRenewAccessToken(error);
           }
         }
 
         await clearBuildVerticesState(error);
 
-        if (!isAuthenticationError) {
-          return Promise.reject(error);
-        }
+        return Promise.reject(error);
       },
     );
 
     const isAuthorizedURL = (url) => {
+      if (!url) return false;
+      const authorizedEndpoints = ["auto_login"];
+      const isEndpointAllowed = authorizedEndpoints.some((endpoint) =>
+        url.includes(endpoint),
+      );
+      if (isEndpointAllowed) return true;
+
       const authorizedDomains = [
         "https://raw.githubusercontent.com/langflow-ai/langflow_examples/main/examples",
         "https://api.github.com/repos/langflow-ai/langflow_examples/contents/examples",
         "https://api.github.com/repos/langflow-ai/langflow",
-        "auto_login",
       ];
 
-      const authorizedEndpoints = ["auto_login"];
-
       try {
-        const parsedURL = new URL(url);
+        const parsedURL = new URL(url, window.location.origin);
         const isDomainAllowed = authorizedDomains.some(
           (domain) => parsedURL.origin === new URL(domain).origin,
         );
-        const isEndpointAllowed = authorizedEndpoints.some((endpoint) =>
-          parsedURL.pathname.includes(endpoint),
-        );
 
-        return isDomainAllowed || isEndpointAllowed;
+        return isDomainAllowed;
       } catch (e) {
         // Invalid URL
         return false;
@@ -167,24 +169,23 @@ function ApiInterceptor() {
   }
 
   async function tryToRenewAccessToken(error: AxiosError) {
-    if (isLoginPage) return;
+    if (isLoginPage) return Promise.reject(error);
     if (error.config?.headers) {
       for (const [key, value] of Object.entries(customHeaders)) {
         error.config.headers[key] = value;
       }
     }
-    mutationRenewAccessToken(undefined, {
-      onSuccess: async () => {
-        setAuthenticationErrorCount(0);
-        await remakeRequest(error);
-        setAuthenticationErrorCount(0);
-      },
-      onError: (error) => {
-        console.error(error);
-        mutationLogout();
-        return Promise.reject("Authentication error");
-      },
-    });
+    try {
+      await mutationRenewAccessToken();
+      setAuthenticationErrorCount(0);
+      const res = await remakeRequest(error);
+      setAuthenticationErrorCount(0);
+      return res;
+    } catch (err) {
+      console.error(err);
+      mutationLogout();
+      return Promise.reject(err);
+    }
   }
 
   async function clearBuildVerticesState(error) {
