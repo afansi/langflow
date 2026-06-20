@@ -40,6 +40,7 @@ export default defineConfig(({ mode }) => {
         env.ACCESS_TOKEN_EXPIRE_SECONDS,
       ),
       "process.env.CI": JSON.stringify(env.CI),
+      PACKAGE_VERSION: JSON.stringify("3.2.1"),
     },
     plugins: [react(), svgr(), tsconfigPaths()],
     server: {
